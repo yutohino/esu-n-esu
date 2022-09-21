@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "433325071392",
+    "project_id": "esu-n-716b1",
+    "storage_bucket": "esu-n-716b1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:433325071392:android:fc73f677ed5613bfc87045",
+        "android_client_info": {
+          "package_name": "com.yutohino.esu_n_esu.esu_n_esu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "433325071392-f9bphltqq6aekkn8j8pel3qrs2smsgo6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD900iuq-dn_Tzz-iVf2-5aPqz4h3cSjPA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "433325071392-f9bphltqq6aekkn8j8pel3qrs2smsgo6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "433325071392-hgc9600k1di9ajd598737fjv0ksmm8f6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.yutohino.esunesu.esuNEsu"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -28,56 +28,77 @@ class HomePage extends StatelessWidget {
         body: Center(
           child: Consumer<HomeModel>(builder: (context, model, child) {
             final posts = model.posts;
-            if (posts == null) {
+            if (posts.isEmpty) {
               // ポストを取得するまでサークルを表示
               return CircularProgressIndicator();
             }
 
-            // ポストを全件リスト表示する
-            return ListView(
-              children: posts
-                  .map((post) => Container(
-                        height: 200, // TODO: 高さを可変できるようにしたい
-                        width: double.infinity,
-                        padding: EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              post.title!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              post.content!,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            SizedBox(height: 8),
-                            Row(
-                              children: [
-                                // TODO: 枚数に応じて画像を表示できるようにする
-                                Image.network(
-                                  'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
-                                  height: 50,
-                                ),
-                                SizedBox(width: 8),
-                                Image.network(
-                                  'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
-                                  height: 50,
-                                ),
-                              ],
-                            )
-                          ],
+            // ポストを20件ずつリスト表示する
+            final controller = ScrollController();
+            controller.addListener(() async {
+              // TODO: 最下部までスクロールした時の挙動を書く
+            });
+            return ListView.separated(
+              controller: controller,
+              itemCount: model.posts.length + 1,
+              itemBuilder: (BuildContext context, int index) {
+                if (index < posts.length) {
+                  return Container(
+                    height: 200, // TODO: 高さを可変できるようにしたい
+                    width: double.infinity,
+                    padding: EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          posts[index].title!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
+                          ),
                         ),
-                      ))
-                  .toList(),
+                        SizedBox(height: 8),
+                        Text(
+                          posts[index].content!,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 8),
+                        Row(
+                          children: [
+                            // TODO: 枚数に応じて画像を表示できるようにする
+                            Image.network(
+                              'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
+                              height: 50,
+                            ),
+                            SizedBox(width: 8),
+                            Image.network(
+                              'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
+                              height: 50,
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  );
+                } else {
+                  // 最下部までスクロール時の追加読み込み表示
+                  return SizedBox(
+                    height: 100,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+              },
+              separatorBuilder: (BuildContext context, int index) => Container(
+                width: double.infinity,
+                height: 0.5,
+                color: Colors.grey,
+              ),
             );
           }),
         ),

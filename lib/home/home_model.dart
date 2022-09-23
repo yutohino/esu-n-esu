@@ -3,7 +3,10 @@ import 'package:esu_n_esu/domain/post.dart';
 import 'package:flutter/material.dart';
 
 class HomeModel extends ChangeNotifier {
-  List<Post>? posts;
+  List<Post> posts = [];
+
+  late ScrollController _scrollController;
+  bool _isLoading = false;
 
   /// ポストを全件取得
   Future fetchPosts() async {

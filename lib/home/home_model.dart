@@ -4,12 +4,22 @@ import 'package:flutter/material.dart';
 
 class HomeModel extends ChangeNotifier {
   List<Post> posts = [];
+  bool isLoading = false;
+  DocumentSnapshot? fetchedLastDoc; // 現在取得している最後のドキュメントを保持
 
-  late ScrollController _scrollController;
-  bool _isLoading = false;
+  void startLoading() {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  void endLoading() {
+    isLoading = false;
+    notifyListeners();
+  }
 
   /// ポストを全件取得
   Future fetchPosts() async {
+    // TODO: 投稿順に並べて、startAfterDocumentとendAtDocumentとlimitを使って10件ずつ取得する
     final QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('posts').get();
     final List<Post> posts =
@@ -18,5 +28,5 @@ class HomeModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // TODO: ログインしてるかチェック
+// TODO: ログインしてるかチェック
 }

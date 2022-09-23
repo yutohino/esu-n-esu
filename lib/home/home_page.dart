@@ -37,6 +37,15 @@ class HomePage extends StatelessWidget {
             final controller = ScrollController();
             controller.addListener(() async {
               // TODO: 最下部までスクロールした時の挙動を書く
+              if (controller.position.maxScrollExtent == controller.offset &&
+                  !model.isLoading) {
+                model.startLoading();
+
+                // TODO: コンテンツをFirestoreから10件追加取得
+                model.fetchPosts();
+
+                model.endLoading();
+              }
             });
             return ListView.separated(
               controller: controller,
@@ -85,7 +94,7 @@ class HomePage extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // 最下部までスクロール時の追加読み込み表示
+                  // 最下部までスクロール時のポスト追加読み込み表示
                   return SizedBox(
                     height: 100,
                     child: Center(

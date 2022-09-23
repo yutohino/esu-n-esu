@@ -17,7 +17,6 @@ class HomePage extends StatelessWidget {
           actions: [
             IconButton(
               onPressed: () {
-                // TODO: ローディング中はタップできないようにする
                 // TODO: マイページ or ログイン画面に遷移
               },
               icon: Icon(Icons.account_circle_outlined),
@@ -33,20 +32,20 @@ class HomePage extends StatelessWidget {
               return CircularProgressIndicator();
             }
 
-            // ポストを20件ずつリスト表示する
+            // ポストを10件ずつリスト表示する
             final controller = ScrollController();
             controller.addListener(() async {
-              // TODO: 最下部までスクロールした時の挙動を書く
+              if (model.isFetchLastItem) {
+                return;
+              }
               if (controller.position.maxScrollExtent == controller.offset &&
                   !model.isLoading) {
                 model.startLoading();
-
-                // TODO: コンテンツをFirestoreから10件追加取得
                 model.fetchPosts();
-
                 model.endLoading();
               }
             });
+            // TODO: 画面を下スワイプしたら、リストをリフレッシュ(更新)する
             return ListView.separated(
               controller: controller,
               itemCount: model.posts.length + 1,
@@ -94,13 +93,18 @@ class HomePage extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // 最下部までスクロール時のポスト追加読み込み表示
-                  return SizedBox(
-                    height: 100,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
+                  if (model.isFetchLastItem) {
+                    // ポストを最後まで読み込んだらインジケータを非表示
+                    return Container();
+                  } else {
+                    // 最下部にポストの追加読み込みインジケーター表示
+                    return SizedBox(
+                      height: 100,
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
                 }
               },
               separatorBuilder: (BuildContext context, int index) => Container(

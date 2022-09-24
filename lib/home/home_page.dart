@@ -63,17 +63,44 @@ class HomePage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            posts[index].title!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  posts[index].title!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    width: 0.5,
+                                    color: Colors.black87,
+                                  ),
+                                  image: DecorationImage(
+                                    fit: BoxFit.fill,
+                                    image: NetworkImage(
+                                      // TODO: 投稿したユーザーの画像を表示する
+                                      posts[index].imageUrls![0],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: 4),
                           Text(
                             posts[index].content!,
                             maxLines: 3,
@@ -82,7 +109,7 @@ class HomePage extends StatelessWidget {
                               height: 1.2,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          SizedBox(height: 8),
                           Row(
                             children: [
                               for (String imageUrl

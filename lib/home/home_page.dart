@@ -54,11 +54,10 @@ class HomePage extends StatelessWidget {
               },
               child: ListView.separated(
                 controller: controller,
-                itemCount: model.posts.length + 1,
+                itemCount: posts.length + 1,
                 itemBuilder: (BuildContext context, int index) {
                   if (index < posts.length) {
                     return Container(
-                      height: 200, // TODO: 高さを可変できるようにしたい
                       width: double.infinity,
                       padding: EdgeInsets.all(8),
                       child: Column(
@@ -79,22 +78,27 @@ class HomePage extends StatelessWidget {
                             posts[index].content!,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              height: 1.2,
+                            ),
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: 4),
                           Row(
                             children: [
-                              // TODO: 枚数に応じて画像を表示できるようにする
-                              Image.network(
-                                'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
-                                height: 50,
-                              ),
-                              SizedBox(width: 8),
-                              Image.network(
-                                'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
-                                height: 50,
-                              ),
+                              for (String imageUrl
+                                  in posts[index].imageUrls!) ...{
+                                Container(
+                                  color: Colors.black12,
+                                  child: Image.network(
+                                    imageUrl,
+                                    height: 80,
+                                    width: 80,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                              },
                             ],
-                          )
+                          ),
                         ],
                       ),
                     );
@@ -116,7 +120,7 @@ class HomePage extends StatelessWidget {
                 separatorBuilder: (BuildContext context, int index) =>
                     Container(
                   width: double.infinity,
-                  height: 0.5,
+                  height: 0.25,
                   color: Colors.grey,
                 ),
               ),

@@ -66,5 +66,12 @@ class HomeModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 取得したポストの情報とフラグをリセット
+  void reset() {
+    posts = [];
+    _fetchedLastSnapshot = null;
+    isFetchLastItem = false;
+  }
+
 // TODO: ログインしてるかチェック
 }

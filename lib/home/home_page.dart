@@ -45,72 +45,80 @@ class HomePage extends StatelessWidget {
                 model.endLoading();
               }
             });
-            // TODO: 画面を下スワイプしたら、リストをリフレッシュ(更新)する
-            return ListView.separated(
-              controller: controller,
-              itemCount: model.posts.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (index < posts.length) {
-                  return Container(
-                    height: 200, // TODO: 高さを可変できるようにしたい
-                    width: double.infinity,
-                    padding: EdgeInsets.all(8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          posts[index].title!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
+
+            return RefreshIndicator(
+              // ポストの情報を初期化 & 最初の10件を取得
+              onRefresh: () async {
+                model.reset();
+                model.firstFetchPosts();
+              },
+              child: ListView.separated(
+                controller: controller,
+                itemCount: model.posts.length + 1,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index < posts.length) {
+                    return Container(
+                      height: 200, // TODO: 高さを可変できるようにしたい
+                      width: double.infinity,
+                      padding: EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            posts[index].title!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          posts[index].content!,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 8),
-                        Row(
-                          children: [
-                            // TODO: 枚数に応じて画像を表示できるようにする
-                            Image.network(
-                              'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
-                              height: 50,
-                            ),
-                            SizedBox(width: 8),
-                            Image.network(
-                              'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
-                              height: 50,
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  );
-                } else {
-                  if (model.isFetchLastItem) {
-                    // ポストを最後まで読み込んだらインジケータを表示しない
-                    return Container();
-                  } else {
-                    // 最下部にポストの追加読み込みインジケーターを表示
-                    return SizedBox(
-                      height: 100,
-                      child: Center(
-                        child: CircularProgressIndicator(),
+                          SizedBox(height: 8),
+                          Text(
+                            posts[index].content!,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              // TODO: 枚数に応じて画像を表示できるようにする
+                              Image.network(
+                                'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
+                                height: 50,
+                              ),
+                              SizedBox(width: 8),
+                              Image.network(
+                                'https://pbs.twimg.com/media/CqRhw4dVMAAmnR1.jpg',
+                                height: 50,
+                              ),
+                            ],
+                          )
+                        ],
                       ),
                     );
+                  } else {
+                    if (model.isFetchLastItem) {
+                      // ポストを最後まで読み込んだらインジケータを表示しない
+                      return Container();
+                    } else {
+                      // 最下部にポストの追加読み込みインジケーターを表示
+                      return SizedBox(
+                        height: 100,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
                   }
-                }
-              },
-              separatorBuilder: (BuildContext context, int index) => Container(
-                width: double.infinity,
-                height: 0.5,
-                color: Colors.grey,
+                },
+                separatorBuilder: (BuildContext context, int index) =>
+                    Container(
+                  width: double.infinity,
+                  height: 0.5,
+                  color: Colors.grey,
+                ),
               ),
             );
           }),

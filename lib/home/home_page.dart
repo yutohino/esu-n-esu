@@ -10,7 +10,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
-      create: (_) => HomeModel()..fetchPosts(), // TODO: 必要な情報を取得する
+      create: (_) => HomeModel()..firstFetchPosts(),
       child: Scaffold(
         appBar: AppBar(
           title: Text('ホーム'),
@@ -94,10 +94,10 @@ class HomePage extends StatelessWidget {
                   );
                 } else {
                   if (model.isFetchLastItem) {
-                    // ポストを最後まで読み込んだらインジケータを非表示
+                    // ポストを最後まで読み込んだらインジケータを表示しない
                     return Container();
                   } else {
-                    // 最下部にポストの追加読み込みインジケーター表示
+                    // 最下部にポストの追加読み込みインジケーターを表示
                     return SizedBox(
                       height: 100,
                       child: Center(

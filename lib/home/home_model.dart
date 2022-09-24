@@ -10,12 +10,10 @@ class HomeModel extends ChangeNotifier {
 
   void startLoading() {
     isLoading = true;
-    notifyListeners();
   }
 
   void endLoading() {
     isLoading = false;
-    notifyListeners();
   }
 
   /// ポストを10件取得(初回)

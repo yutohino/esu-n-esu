@@ -2,6 +2,7 @@
 
 import 'package:esu_n_esu/home/home_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
@@ -125,6 +126,14 @@ class HomePage extends StatelessWidget {
                                 SizedBox(width: 8),
                               },
                             ],
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            '投稿日 [${DateFormat('yyyy/MM/dd').format(posts[index].createdAt!)}]',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
                           ),
                         ],
                       ),

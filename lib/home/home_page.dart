@@ -1,13 +1,12 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors
 
+import 'package:esu_n_esu/edit/edit_post_page.dart';
 import 'package:esu_n_esu/home/home_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
@@ -87,21 +86,21 @@ class HomePage extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    width: 0.5,
+                                    width: 1,
                                     color: Colors.black87,
                                   ),
                                   image: DecorationImage(
                                     fit: BoxFit.fill,
                                     image: NetworkImage(
                                       // TODO: 投稿したユーザーの画像を表示する
-                                      posts[index].imageUrls![0],
+                                      'https://lh3.googleusercontent.com/ogw/AOh-ky1WEX_uU48CtT9y2AhbF-6xx1t3XJUG0fJ5VprZYw=s64-c-mo',
                                     ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 4),
+                          SizedBox(height: 8),
                           Text(
                             posts[index].content!,
                             maxLines: 3,
@@ -163,13 +162,21 @@ class HomePage extends StatelessWidget {
             );
           }),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // TODO: 投稿作成画面
-          },
-          tooltip: '新規記事投稿',
-          child: Icon(Icons.add),
-        ),
+        floatingActionButton:
+            Consumer<HomeModel>(builder: (context, model, child) {
+          return FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditPostPage(null),
+                    fullscreenDialog: true,
+                  ));
+            },
+            tooltip: '新規記事投稿',
+            child: Icon(Icons.add),
+          );
+        }),
       ),
     );
   }

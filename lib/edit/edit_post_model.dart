@@ -45,14 +45,11 @@ class EditPostModel extends ChangeNotifier {
     this.content = content;
   }
 
-  // TODO: 画像取得処理
+  // TODO: 画像取得処理(投稿済みのポストから) ※編集機能を作成時に実装する
 
-  // TODO: 画像挿入処理(タップした場所に挿入)
   Future pickImage(int index) async {
-    // TODO: パーミッションの実装
     final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      print('File取得できた');
       imageFiles.addAll({index: File(pickedFile.path)});
       notifyListeners();
     }

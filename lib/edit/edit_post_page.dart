@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, prefer_const_constructors_in_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, iterable_contains_unrelated_type
 
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit/edit_post_model.dart';
@@ -77,79 +77,19 @@ class EditPostPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      for (int i = 0; i < 4; i++) ...{
-                        //
-                        if (model.post == null) ...{
-                          if (model.imageFiles.containsKey(i)) ...{
-                            // 端末から取得した画像を表示
-                            // TODO: book-list-sampleのリスト項目みたいに
-                            // TODO: メソッドでWidgetを返す（あとmodel.imageFiles[i]!の分岐は共通化できそう）
-                          } else ...{
-                            GestureDetector(
-                              onTap: () async {
-                                await model.pickImage(i);
-                                print('画像なし');
-                              },
-                              onLongPress: () {
-                                // TODO: 削除
-                              },
-                              child: Container(
-                                height: 80,
-                                width: 80,
-                                color: Colors.black12,
-                              ),
-                            ),
-                          },
+                      for (int index = 0; index < 4; index++) ...{
+                        if (model.imageFiles.containsKey(index)) ...{
+                          // 端末から取得した画像
+                          _pickedImageBox(context, model, index),
+                        } else if (model.post != null &&
+                            model.post!.imageUrls!.contains(index)) ...{
+                          // アップロード済みの画像
+                          _uploadedImageBox(context, model, index)
+                        } else ...{
+                          // 画像なし
+                          _emptyImageBox(model, index),
                         },
-                        if (model.post != null) ...{
-                          if (model.post!.imageUrls!.contains(i)) ...{
-                            // ポストにアップロード済みの画像を表示
-                            GestureDetector(
-                              onTap: () async {
-                                // TODO: 削除、または編集か質問ダイアログ出す
-                                await model.pickImage(i);
-                                print('うp済み');
-                              },
-                              onLongPress: () {
-                                // TODO: 削除
-                              },
-                              child: Image.network(model.post!.imageUrls![i]),
-                            ),
-                          } else if (model.imageFiles.containsKey(i)) ...{
-                            // 端末から取得した画像を表示
-                            GestureDetector(
-                              onTap: () async {
-                                await model.pickImage(i);
-                                print('端末から取得済み');
-                              },
-                              onLongPress: () {
-                                // TODO: 削除
-                              },
-                              child: Container(
-                                height: 80,
-                                width: 80,
-                                color: Colors.black12,
-                                child: Image.file(model.imageFiles[i]!),
-                              ),
-                            ),
-                          } else ...{
-                            GestureDetector(
-                              onTap: () async {
-                                await model.pickImage(i);
-                                print('画像なし');
-                              },
-                              onLongPress: () {
-                                // TODO: 削除
-                              },
-                              child: Container(
-                                height: 80,
-                                width: 80,
-                                color: Colors.black12,
-                              ),
-                            ),
-                          },
-                        },
-                        if (i < 3) ...{
+                        if (index < 3) ...{
                           Expanded(
                             child: SizedBox(),
                           ),
@@ -166,6 +106,84 @@ class EditPostPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _emptyImageBox(EditPostModel model, int index) {
+    return GestureDetector(
+      onTap: () async {
+        await model.pickImage(index);
+      },
+      child: Container(
+        height: 80,
+        width: 80,
+        color: Colors.black12,
+      ),
+    );
+  }
+
+  Widget _pickedImageBox(BuildContext context, EditPostModel model, int index) {
+    return GestureDetector(
+      onTap: () {
+        // TODO: 削除、または編集か質問ダイアログ出す
+        _showChangeOrDeleteImageDialog(context, model, index);
+      },
+      child: Container(
+        height: 80,
+        width: 80,
+        color: Colors.black12,
+        child: Image.file(model.imageFiles[index]!),
+      ),
+    );
+  }
+
+  Widget _uploadedImageBox(
+      BuildContext context, EditPostModel model, int index) {
+    return GestureDetector(
+      onTap: () {
+        // TODO: 削除、または編集か質問ダイアログ出す
+        _showChangeOrDeleteImageDialog(context, model, index);
+      },
+      child: Container(
+          height: 80,
+          width: 80,
+          color: Colors.black12,
+          child: Image.network(model.post!.imageUrls![index])),
+    );
+  }
+
+  /// 画像を変更 or 削除の確認ダイアログ
+  Future _showChangeOrDeleteImageDialog(
+      BuildContext context, EditPostModel model, int index) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text('$index番目の画像を削除または変更しますか?'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: Text('変更'),
+              onPressed: () async {
+                Navigator.pop(context);
+                await model.pickImage(index);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: Text('削除'),
+              onPressed: () {
+                Navigator.pop(context);
+                // TODO: アップロードした画像 or 端末から取得した画像を削除する
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

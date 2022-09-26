@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditPostModel extends ChangeNotifier {
   final Post? post;
@@ -12,7 +15,6 @@ class EditPostModel extends ChangeNotifier {
     }
   }
 
-  List<Post> posts = [];
   bool isUploading = false;
 
   final titleController = TextEditingController();
@@ -21,6 +23,9 @@ class EditPostModel extends ChangeNotifier {
   String? title;
   String? content;
   List<String>? imageUrls;
+
+  final imagePicker = ImagePicker();
+  Map<int, File> imageFiles = {};
 
   void startLoading() {
     isUploading = true;
@@ -42,7 +47,16 @@ class EditPostModel extends ChangeNotifier {
 
   // TODO: 画像取得処理
 
-  // TODO: 画像挿入処理
+  // TODO: 画像挿入処理(タップした場所に挿入)
+  Future pickImage(int index) async {
+    // TODO: パーミッションの実装
+    final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      print('File取得できた');
+      imageFiles.addAll({index: File(pickedFile.path)});
+      notifyListeners();
+    }
+  }
 
   bool isUpdated() {
     return title != null || content != null;

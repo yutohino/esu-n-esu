@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 class EditPostPage extends StatelessWidget {
   final Post? post;
+
   EditPostPage(this.post);
 
   @override
@@ -76,63 +77,84 @@ class EditPostPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: PickImage
+                      for (int i = 0; i < 4; i++) ...{
+                        //
+                        if (model.post == null) ...{
+                          if (model.imageFiles.containsKey(i)) ...{
+                            // 端末から取得した画像を表示
+                            // TODO: book-list-sampleのリスト項目みたいに
+                            // TODO: メソッドでWidgetを返す（あとmodel.imageFiles[i]!の分岐は共通化できそう）
+                          } else ...{
+                            GestureDetector(
+                              onTap: () async {
+                                await model.pickImage(i);
+                                print('画像なし');
+                              },
+                              onLongPress: () {
+                                // TODO: 削除
+                              },
+                              child: Container(
+                                height: 80,
+                                width: 80,
+                                color: Colors.black12,
+                              ),
+                            ),
+                          },
                         },
-                        child: SizedBox(
-                          height: 80,
-                          width: 80,
-                          child: Container(
-                            color: Colors.black12,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: SizedBox(),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: PickImage
+                        if (model.post != null) ...{
+                          if (model.post!.imageUrls!.contains(i)) ...{
+                            // ポストにアップロード済みの画像を表示
+                            GestureDetector(
+                              onTap: () async {
+                                // TODO: 削除、または編集か質問ダイアログ出す
+                                await model.pickImage(i);
+                                print('うp済み');
+                              },
+                              onLongPress: () {
+                                // TODO: 削除
+                              },
+                              child: Image.network(model.post!.imageUrls![i]),
+                            ),
+                          } else if (model.imageFiles.containsKey(i)) ...{
+                            // 端末から取得した画像を表示
+                            GestureDetector(
+                              onTap: () async {
+                                await model.pickImage(i);
+                                print('端末から取得済み');
+                              },
+                              onLongPress: () {
+                                // TODO: 削除
+                              },
+                              child: Container(
+                                height: 80,
+                                width: 80,
+                                color: Colors.black12,
+                                child: Image.file(model.imageFiles[i]!),
+                              ),
+                            ),
+                          } else ...{
+                            GestureDetector(
+                              onTap: () async {
+                                await model.pickImage(i);
+                                print('画像なし');
+                              },
+                              onLongPress: () {
+                                // TODO: 削除
+                              },
+                              child: Container(
+                                height: 80,
+                                width: 80,
+                                color: Colors.black12,
+                              ),
+                            ),
+                          },
                         },
-                        child: SizedBox(
-                          height: 80,
-                          width: 80,
-                          child: Container(
-                            color: Colors.black12,
+                        if (i < 3) ...{
+                          Expanded(
+                            child: SizedBox(),
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: SizedBox(),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: PickImage
                         },
-                        child: SizedBox(
-                          height: 80,
-                          width: 80,
-                          child: Container(
-                            color: Colors.black12,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: SizedBox(),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: PickImage
-                        },
-                        child: SizedBox(
-                          height: 80,
-                          width: 80,
-                          child: Container(
-                            color: Colors.black12,
-                          ),
-                        ),
-                      ),
+                      },
                     ],
                   ),
                   SizedBox(

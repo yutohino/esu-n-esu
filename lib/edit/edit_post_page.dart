@@ -125,7 +125,6 @@ class EditPostPage extends StatelessWidget {
   Widget _pickedImageBox(BuildContext context, EditPostModel model, int index) {
     return GestureDetector(
       onTap: () {
-        // TODO: 削除、または編集か質問ダイアログ出す
         _showChangeOrDeleteImageDialog(context, model, index);
       },
       child: Container(
@@ -141,7 +140,6 @@ class EditPostPage extends StatelessWidget {
       BuildContext context, EditPostModel model, int index) {
     return GestureDetector(
       onTap: () {
-        // TODO: 削除、または編集か質問ダイアログ出す
         _showChangeOrDeleteImageDialog(context, model, index);
       },
       child: Container(
@@ -178,7 +176,7 @@ class EditPostPage extends StatelessWidget {
               child: Text('削除'),
               onPressed: () {
                 Navigator.pop(context);
-                // TODO: アップロードした画像 or 端末から取得した画像を削除する
+                model.deleteImage(index);
               },
             ),
           ],

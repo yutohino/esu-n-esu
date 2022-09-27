@@ -59,7 +59,19 @@ class EditPostModel extends ChangeNotifier {
     return title != null || content != null;
   }
 
+  /// アップロードした画像、または端末から取得した画像を削除
+  void deleteImage(int index) {
+    if (imageFiles.containsKey(index)) {
+      imageFiles.remove(index);
+    } else {
+      imageUrls!.removeAt(index);
+      // TODO: 削除した画像のURLを記憶して、編集保存時にStorageの削除処理をする
+    }
+    notifyListeners();
+  }
+
   // TODO: 新規投稿処理
 
   // TODO: 編集処理
+  // TODO: アップロードした画像を削除 or 置き換えた場合、画像をStorageからも削除するようにする
 }

@@ -88,7 +88,6 @@ class EditPostModel extends ChangeNotifier {
       // インデックスの順番に並び替える
       imageFiles = SplayTreeMap.from(imageFiles, (a, b) => a.compareTo(b));
       for (File imageFile in imageFiles.values) {
-        print(imageFiles);
         final task = await FirebaseStorage.instance
             .ref('posts/${doc.id}${imageFile.hashCode}')
             .putFile(imageFile);
@@ -105,6 +104,12 @@ class EditPostModel extends ChangeNotifier {
       'content': content,
       'imageUrls': this.imageUrls,
       'createdAt': Timestamp.now(),
+      'editedAt': Timestamp.now(),
+      'username': 'admin', // TODO: ログインしているユーザー情報から取得する
+      // TODO: ログインしているユーザー情報から取得する
+      'userImageUrl':
+          'https://lh3.googleusercontent.com/ogw/AOh-ky1WEX_uU48CtT9y2AhbF-6xx1t3XJUG0fJ5VprZYw=s64-c-mo',
+      'isEdited': false,
     });
   }
 

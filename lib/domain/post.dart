@@ -6,8 +6,13 @@ class Post {
     title = data['title'];
     content = data['content'];
     imageUrls = List.from(data['imageUrls']);
-    final timestamp = data['createdAt'] as Timestamp;
-    createdAt = timestamp.toDate();
+    final createdAtTimestamp = data['createdAt'] as Timestamp;
+    createdAt = createdAtTimestamp.toDate();
+    final editedAtTimestamp = data['editedAt'] as Timestamp;
+    editedAt = editedAtTimestamp.toDate();
+    username = data['username'];
+    userImageUrl = data['userImageUrl'];
+    isEdited = data['isEdited'];
     documentReference = doc.reference;
   }
 
@@ -15,5 +20,9 @@ class Post {
   String? content;
   List<String>? imageUrls;
   DateTime? createdAt;
+  DateTime? editedAt;
+  String? username;
+  String? userImageUrl;
+  bool isEdited = false;
   DocumentReference? documentReference;
 }

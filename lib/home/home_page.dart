@@ -63,42 +63,15 @@ class HomePage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  posts[index].title!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    width: 1,
-                                    color: Colors.black87,
-                                  ),
-                                  image: DecorationImage(
-                                    fit: BoxFit.fill,
-                                    image: NetworkImage(
-                                      // TODO: 投稿したユーザーの画像を表示する
-                                      'https://lh3.googleusercontent.com/ogw/AOh-ky1WEX_uU48CtT9y2AhbF-6xx1t3XJUG0fJ5VprZYw=s64-c-mo',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          Text(
+                            posts[index].title!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
+                            ),
                           ),
                           SizedBox(height: 8),
                           Text(
@@ -109,7 +82,7 @@ class HomePage extends StatelessWidget {
                               height: 1.2,
                             ),
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: 4),
                           Row(
                             children: [
                               for (String imageUrl
@@ -132,6 +105,36 @@ class HomePage extends StatelessWidget {
                                 ),
                                 SizedBox(width: 8),
                               },
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    width: 0.5,
+                                    color: Colors.black87,
+                                  ),
+                                  image: DecorationImage(
+                                    fit: BoxFit.fill,
+                                    image: NetworkImage(
+                                      posts[index].userImageUrl!,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                posts[index].username!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                ),
+                              ),
                             ],
                           ),
                           SizedBox(height: 8),

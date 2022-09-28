@@ -28,6 +28,7 @@ class HomeModel extends ChangeNotifier {
     // 次のページ読み込み時の開始地点を設定
     _fetchedLastSnapshot = snapshots.docs.last;
 
+    posts = []; // 表示中のポストを初期化
     snapshots.docs.map((document) {
       final post = Post(document);
       posts.add(post);

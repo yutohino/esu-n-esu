@@ -23,7 +23,26 @@ class EditPostPage extends StatelessWidget {
               return TextButton(
                 onPressed: isActive
                     ? () async {
-                        // TODO: 投稿処理
+                        try {
+                          model.startUploading();
+                          String uploadedMessage;
+                          if (model.post == null) {
+                            await model.uploadNewPost();
+                            uploadedMessage = 'ポストを新規投稿しました';
+                          } else {
+                            await model.uploadExistingPost();
+                            uploadedMessage = 'ポストを更新しました';
+                          }
+                          Navigator.pop(context, uploadedMessage);
+                        } catch (e) {
+                          final snackBar = SnackBar(
+                            content: Text(e.toString()),
+                            backgroundColor: Colors.red,
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        } finally {
+                          model.endUploading();
+                        }
                       }
                     : null,
                 child: Text(
@@ -37,73 +56,92 @@ class EditPostPage extends StatelessWidget {
             }),
           ],
         ),
-        body: Container(
-          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-          alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            child: Consumer<EditPostModel>(builder: (context, model, child) {
-              return Column(
-                children: [
-                  TextField(
-                    controller: model.titleController,
-                    maxLength: 50,
-                    style: TextStyle(
-                      fontSize: 24,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'タイトル',
-                    ),
-                    onChanged: (text) {
-                      model.setTitle(text);
-                    },
-                  ),
-                  SizedBox(height: 8),
-                  TextField(
-                    controller: model.contentController,
-                    maxLength: 2200,
-                    maxLines: 20,
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: '内容',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (text) {
-                      model.setContent(text);
-                    },
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        body: Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                child:
+                    Consumer<EditPostModel>(builder: (context, model, child) {
+                  return Column(
                     children: [
-                      for (int index = 0; index < 4; index++) ...{
-                        if (model.imageFiles.containsKey(index)) ...{
-                          // 端末から取得した画像
-                          _pickedImageBox(context, model, index),
-                        } else if (model.post != null &&
-                            model.post!.imageUrls!.contains(index)) ...{
-                          // アップロード済みの画像
-                          _uploadedImageBox(context, model, index)
-                        } else ...{
-                          // 画像なし
-                          _emptyImageBox(model, index),
+                      TextField(
+                        controller: model.titleController,
+                        maxLength: 50,
+                        style: TextStyle(
+                          fontSize: 24,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'タイトル',
+                        ),
+                        onChanged: (text) {
+                          model.setTitle(text);
                         },
-                        if (index < 3) ...{
-                          Expanded(
-                            child: SizedBox(),
-                          ),
+                      ),
+                      SizedBox(height: 8),
+                      TextField(
+                        controller: model.contentController,
+                        maxLength: 2200,
+                        maxLines: 20,
+                        style: TextStyle(
+                          fontSize: 18,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: '内容',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (text) {
+                          model.setContent(text);
                         },
-                      },
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          for (int index = 0; index < 4; index++) ...{
+                            if (model.imageFiles.containsKey(index)) ...{
+                              // 端末から取得した画像
+                              _pickedImageBox(context, model, index),
+                            } else if (model.post != null &&
+                                model.post!.imageUrls!.contains(index)) ...{
+                              // アップロード済みの画像
+                              _uploadedImageBox(context, model, index)
+                            } else ...{
+                              // 画像なし
+                              _emptyImageBox(model, index),
+                            },
+                            if (index < 3) ...{
+                              Expanded(
+                                child: SizedBox(),
+                              ),
+                            },
+                          },
+                        ],
+                      ),
+                      SizedBox(
+                        height: 32,
+                      ),
                     ],
-                  ),
-                  SizedBox(
-                    height: 32,
-                  ),
-                ],
-              );
-            }),
-          ),
+                  );
+                }),
+              ),
+            ),
+            Consumer<EditPostModel>(
+              builder: (context, model, child) {
+                if (model.isUploading) {
+                  return Container(
+                    // height: double.infinity,
+                    color: Colors.black54,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                return Container();
+              },
+            ),
+          ],
         ),
       ),
     );

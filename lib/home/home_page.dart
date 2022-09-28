@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously
 
 import 'package:esu_n_esu/edit/edit_post_page.dart';
 import 'package:esu_n_esu/home/home_model.dart';
@@ -120,6 +120,14 @@ class HomePage extends StatelessWidget {
                                     imageUrl,
                                     height: 80,
                                     width: 80,
+                                    errorBuilder: (BuildContext context,
+                                        Object exception,
+                                        StackTrace? stackTrace) {
+                                      return Icon(
+                                        Icons.image_not_supported_outlined,
+                                        size: 80,
+                                      );
+                                    },
                                   ),
                                 ),
                                 SizedBox(width: 8),
@@ -165,13 +173,23 @@ class HomePage extends StatelessWidget {
         floatingActionButton:
             Consumer<HomeModel>(builder: (context, model, child) {
           return FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
+            // TODO: ログアウトの状態ではボタンを隠す(記事投稿にアカウント情報も保存するため)
+            onPressed: () async {
+              String? uploaded = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditPostPage(null),
                     fullscreenDialog: true,
                   ));
+
+              if (uploaded != null) {
+                final snackBar = SnackBar(
+                  content: Text(uploaded),
+                  backgroundColor: Colors.green,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }
+              model.firstFetchPosts();
             },
             tooltip: '新規記事投稿',
             child: Icon(Icons.add),

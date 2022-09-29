@@ -81,6 +81,7 @@ class HomePage extends StatelessWidget {
               },
               child: ListView.separated(
                 controller: controller,
+                physics: AlwaysScrollableScrollPhysics(),
                 itemCount: posts.length + 1,
                 itemBuilder: (BuildContext context, int index) {
                   if (index < posts.length) {

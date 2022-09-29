@@ -105,6 +105,7 @@ class EditPostModel extends ChangeNotifier {
       'imageUrls': this.imageUrls,
       'createdAt': Timestamp.now(),
       'editedAt': Timestamp.now(),
+      // TODO: uidをポストに保存する
       'username': 'admin', // TODO: ログインしているユーザー情報から取得する
       // TODO: ログインしているユーザー情報から取得する
       'userImageUrl':

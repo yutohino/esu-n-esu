@@ -18,36 +18,45 @@ class HomePage extends StatelessWidget {
         appBar: AppBar(
           title: Text('ホーム'),
           actions: [
-            IconButton(
-              onPressed: () {
-                // TODO: マイページ or ログイン画面に遷移
-                if (FirebaseAuth.instance.currentUser != null) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MyPage(),
-                        fullscreenDialog: true,
-                      ));
-                } else {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginPage(),
-                        fullscreenDialog: true,
-                      ));
-                }
-              },
-              icon: Icon(Icons.account_circle_outlined),
-              iconSize: 36,
-            ),
+            Consumer<HomeModel>(builder: (context, model, child) {
+              return IconButton(
+                onPressed: () async {
+                  if (FirebaseAuth.instance.currentUser != null) {
+                    String? logoutMessage = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MyPage(),
+                        ));
+                    if (logoutMessage != null) {
+                      _showSuccessSnackBar(context, logoutMessage);
+                      model.firstFetchPosts();
+                    }
+                  } else {
+                    String? loginOrRegisterMessage = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoginPage(),
+                        ));
+                    if (loginOrRegisterMessage != null) {
+                      _showSuccessSnackBar(context, loginOrRegisterMessage);
+                      model.firstFetchPosts();
+                    }
+                  }
+                },
+                icon: Icon(Icons.account_circle_outlined),
+                iconSize: 36,
+              );
+            }),
           ],
         ),
         body: Center(
           child: Consumer<HomeModel>(builder: (context, model, child) {
             final posts = model.posts;
             if (posts.isEmpty) {
-              // ポストを取得するまでサークルを表示
-              return CircularProgressIndicator();
+              if (!model.isFetchLastItem) {
+                // ポストを取得するまでサークルを表示
+                return CircularProgressIndicator();
+              }
             }
 
             // ポストを10件ずつリスト表示する
@@ -193,22 +202,20 @@ class HomePage extends StatelessWidget {
         ),
         floatingActionButton:
             Consumer<HomeModel>(builder: (context, model, child) {
+          if (FirebaseAuth.instance.currentUser == null) {
+            return Container();
+          }
           return FloatingActionButton(
-            // TODO: ログアウトの状態ではボタンを隠す(記事投稿にアカウント情報も保存するため)
             onPressed: () async {
-              String? uploaded = await Navigator.push(
+              String? uploadMessage = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditPostPage(null),
                     fullscreenDialog: true,
                   ));
 
-              if (uploaded != null) {
-                final snackBar = SnackBar(
-                  content: Text(uploaded),
-                  backgroundColor: Colors.green,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              if (uploadMessage != null) {
+                _showSuccessSnackBar(context, uploadMessage);
               }
               model.firstFetchPosts();
             },
@@ -218,5 +225,13 @@ class HomePage extends StatelessWidget {
         }),
       ),
     );
+  }
+
+  void _showSuccessSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.green,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

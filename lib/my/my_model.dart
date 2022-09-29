@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/post.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class MyModel extends ChangeNotifier {
@@ -10,10 +13,12 @@ class MyModel extends ChangeNotifier {
 
   void startLoading() {
     isLoading = true;
+    notifyListeners();
   }
 
   void endLoading() {
     isLoading = false;
+    notifyListeners();
   }
 
   /// ポストを10件取得(初回)
@@ -27,6 +32,9 @@ class MyModel extends ChangeNotifier {
 
     // 次のページ読み込み時の開始地点を設定
     _fetchedLastSnapshot = snapshots.docs.last;
+
+    // 取得したポスト数が10件未満なら、postsコレクションのドキュメント
+    isFetchLastItem = snapshots.docs.length < 10;
 
     posts = []; // 表示中のポストを初期化
     snapshots.docs.map((document) {
@@ -72,5 +80,8 @@ class MyModel extends ChangeNotifier {
     isFetchLastItem = false;
   }
 
-// TODO: ログインしてるかチェック
+  Future logout() async {
+    await FirebaseAuth.instance.signOut();
+    sleep(const Duration(seconds: 2));
+  }
 }

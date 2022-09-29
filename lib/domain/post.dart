@@ -10,6 +10,7 @@ class Post {
     createdAt = createdAtTimestamp.toDate();
     final editedAtTimestamp = data['editedAt'] as Timestamp;
     editedAt = editedAtTimestamp.toDate();
+    uid = data['uid'];
     username = data['username'];
     userImageUrl = data['userImageUrl'];
     isEdited = data['isEdited'];
@@ -21,6 +22,7 @@ class Post {
   List<String>? imageUrls;
   DateTime? createdAt;
   DateTime? editedAt;
+  String? uid;
   String? username;
   String? userImageUrl;
   bool isEdited = false;

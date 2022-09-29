@@ -1,20 +1,42 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:esu_n_esu/domain/post.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginModel extends ChangeNotifier {
-  List<Post> posts = [];
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  String? email;
+  String? password;
+
   bool isLoading = false;
-  DocumentSnapshot? _fetchedLastSnapshot; // 現在取得している最後のドキュメントを保持
-  bool isFetchLastItem = false;
 
   void startLoading() {
     isLoading = true;
+    notifyListeners();
   }
 
   void endLoading() {
     isLoading = false;
+    notifyListeners();
   }
 
-// TODO: ログインしてるかチェック
+  void setEmail(String email) {
+    this.email = email;
+    notifyListeners();
+  }
+
+  void setPassword(String password) {
+    this.password = password;
+    notifyListeners();
+  }
+
+  Future login() async {
+    email = emailController.text;
+    password = passwordController.text;
+
+    if (email != null && password != null) {
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email!, password: password!);
+    }
+  }
 }

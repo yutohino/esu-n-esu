@@ -15,20 +15,32 @@ class MyPage extends StatelessWidget {
         appBar: AppBar(
           title: Text('マイページ'),
           actions: [
-            TextButton(
-              onPressed: () {
-                // TODO: ログアウト処理(終わったらホーム画面に戻る)
-              },
-              child: Text('ログアウト'),
-            ),
+            Consumer<MyModel>(builder: (context, model, child) {
+              return TextButton(
+                onPressed: () async {
+                  model.startLoading();
+                  await model.logout();
+                  model.endLoading();
+                  Navigator.pop(context, 'ログアウトしました');
+                },
+                child: Text(
+                  'ログアウト',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            }),
           ],
         ),
         body: Center(
           child: Consumer<MyModel>(builder: (context, model, child) {
             final posts = model.posts;
             if (posts.isEmpty) {
-              // ポストを取得するまでサークルを表示
-              return CircularProgressIndicator();
+              if (!model.isFetchLastItem) {
+                // ポストを取得するまでサークルを表示
+                return CircularProgressIndicator();
+              }
             }
 
             // ポストを10件ずつリスト表示する
@@ -45,90 +57,102 @@ class MyPage extends StatelessWidget {
               }
             });
 
-            return RefreshIndicator(
-              // ポストの情報を初期化 & 最初の10件を取得
-              onRefresh: () async {
-                model.reset();
-                model.firstFetchPosts();
-              },
-              child: ListView.separated(
-                controller: controller,
-                itemCount: posts.length + 1,
-                itemBuilder: (BuildContext context, int index) {
-                  if (index < posts.length) {
-                    return Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            posts[index].title!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            posts[index].content!,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              height: 1.2,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Row(
+            return Stack(
+              children: [
+                RefreshIndicator(
+                  // ポストの情報を初期化 & 最初の10件を取得
+                  onRefresh: () async {
+                    model.reset();
+                    model.firstFetchPosts();
+                  },
+                  child: ListView.separated(
+                    controller: controller,
+                    itemCount: posts.length + 1,
+                    itemBuilder: (BuildContext context, int index) {
+                      if (index < posts.length) {
+                        return Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              for (String imageUrl
-                                  in posts[index].imageUrls!) ...{
-                                Container(
-                                  color: Colors.black12,
-                                  child: Image.network(
-                                    imageUrl,
-                                    height: 80,
-                                    width: 80,
-                                    errorBuilder: (BuildContext context,
-                                        Object exception,
-                                        StackTrace? stackTrace) {
-                                      return Icon(
-                                        Icons.image_not_supported_outlined,
-                                        size: 80,
-                                      );
-                                    },
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                              },
-                            ],
-                          ),
-                          SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Container(
-                                width: 24,
-                                height: 24,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    width: 0.5,
-                                    color: Colors.black87,
-                                  ),
-                                  image: DecorationImage(
-                                    fit: BoxFit.fill,
-                                    image: NetworkImage(
-                                      posts[index].userImageUrl!,
-                                    ),
-                                  ),
+                              Text(
+                                posts[index].title!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
                                 ),
                               ),
-                              SizedBox(width: 4),
+                              SizedBox(height: 8),
                               Text(
-                                posts[index].username!,
+                                posts[index].content!,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  height: 1.2,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  for (String imageUrl
+                                      in posts[index].imageUrls!) ...{
+                                    Container(
+                                      color: Colors.black12,
+                                      child: Image.network(
+                                        imageUrl,
+                                        height: 80,
+                                        width: 80,
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return Icon(
+                                            Icons.image_not_supported_outlined,
+                                            size: 80,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                  },
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        width: 0.5,
+                                        color: Colors.black87,
+                                      ),
+                                      image: DecorationImage(
+                                        fit: BoxFit.fill,
+                                        image: NetworkImage(
+                                          posts[index].userImageUrl!,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    posts[index].username!,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                '投稿日 [${DateFormat('yyyy/MM/dd').format(posts[index].createdAt!)}]',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.black54,
@@ -136,39 +160,38 @@ class MyPage extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(height: 8),
-                          Text(
-                            '投稿日 [${DateFormat('yyyy/MM/dd').format(posts[index].createdAt!)}]',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.black54,
+                        );
+                      } else {
+                        if (model.isFetchLastItem) {
+                          // ポストを最後まで読み込んだらインジケータを表示しない
+                          return Container();
+                        } else {
+                          // 最下部にポストの追加読み込みインジケーターを表示
+                          return SizedBox(
+                            height: 100,
+                            child: Center(
+                              child: CircularProgressIndicator(),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    if (model.isFetchLastItem) {
-                      // ポストを最後まで読み込んだらインジケータを表示しない
-                      return Container();
-                    } else {
-                      // 最下部にポストの追加読み込みインジケーターを表示
-                      return SizedBox(
-                        height: 100,
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-                  }
-                },
-                separatorBuilder: (BuildContext context, int index) =>
-                    Container(
-                  width: double.infinity,
-                  height: 0.25,
-                  color: Colors.grey,
+                          );
+                        }
+                      }
+                    },
+                    separatorBuilder: (BuildContext context, int index) =>
+                        Container(
+                      width: double.infinity,
+                      height: 0.25,
+                      color: Colors.grey,
+                    ),
+                  ),
                 ),
-              ),
+                // if (model.isLoading)
+                Container(
+                  color: Colors.black54,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              ],
             );
           }),
         ),

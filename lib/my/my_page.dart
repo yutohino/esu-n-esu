@@ -1,49 +1,30 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously
 
 import 'package:esu_n_esu/edit/edit_post_page.dart';
-import 'package:esu_n_esu/home/home_model.dart';
-import 'package:esu_n_esu/login/login_page.dart';
-import 'package:esu_n_esu/my/my_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:esu_n_esu/my/my_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class MyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<HomeModel>(
-      create: (_) => HomeModel()..firstFetchPosts(),
+    return ChangeNotifierProvider<MyModel>(
+      create: (_) => MyModel(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('ホーム'),
+          title: Text('マイページ'),
           actions: [
-            IconButton(
+            TextButton(
               onPressed: () {
-                // TODO: マイページ or ログイン画面に遷移
-                if (FirebaseAuth.instance.currentUser != null) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MyPage(),
-                        fullscreenDialog: true,
-                      ));
-                } else {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginPage(),
-                        fullscreenDialog: true,
-                      ));
-                }
+                // TODO: ログアウト処理(終わったらホーム画面に戻る)
               },
-              icon: Icon(Icons.account_circle_outlined),
-              iconSize: 36,
+              child: Text('ログアウト'),
             ),
           ],
         ),
         body: Center(
-          child: Consumer<HomeModel>(builder: (context, model, child) {
+          child: Consumer<MyModel>(builder: (context, model, child) {
             final posts = model.posts;
             if (posts.isEmpty) {
               // ポストを取得するまでサークルを表示
@@ -192,7 +173,7 @@ class HomePage extends StatelessWidget {
           }),
         ),
         floatingActionButton:
-            Consumer<HomeModel>(builder: (context, model, child) {
+            Consumer<MyModel>(builder: (context, model, child) {
           return FloatingActionButton(
             // TODO: ログアウトの状態ではボタンを隠す(記事投稿にアカウント情報も保存するため)
             onPressed: () async {

@@ -28,6 +28,9 @@ class HomeModel extends ChangeNotifier {
     // 次のページ読み込み時の開始地点を設定
     _fetchedLastSnapshot = snapshots.docs.last;
 
+    // 取得したポスト数が10件未満なら、postsコレクションのドキュメント
+    isFetchLastItem = snapshots.docs.length < 10;
+
     posts = []; // 表示中のポストを初期化
     snapshots.docs.map((document) {
       final post = Post(document);

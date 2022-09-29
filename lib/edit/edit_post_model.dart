@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/post.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -98,6 +99,10 @@ class EditPostModel extends ChangeNotifier {
     }
 
     // Firestoreにポストをアップロード
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final data = snapshot.data();
     final collection = FirebaseFirestore.instance.collection('posts');
     await collection.add({
       'title': title,
@@ -105,11 +110,9 @@ class EditPostModel extends ChangeNotifier {
       'imageUrls': this.imageUrls,
       'createdAt': Timestamp.now(),
       'editedAt': Timestamp.now(),
-      // TODO: uidをポストに保存する
-      'username': 'admin', // TODO: ログインしているユーザー情報から取得する
-      // TODO: ログインしているユーザー情報から取得する
-      'userImageUrl':
-          'https://lh3.googleusercontent.com/ogw/AOh-ky1WEX_uU48CtT9y2AhbF-6xx1t3XJUG0fJ5VprZYw=s64-c-mo',
+      'uid': data!['uid'],
+      'username': data['username'],
+      'userImageUrl': data['userImageUrl'] ?? '',
       'isEdited': false,
     });
   }

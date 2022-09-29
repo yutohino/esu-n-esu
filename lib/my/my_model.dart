@@ -26,7 +26,7 @@ class MyModel extends ChangeNotifier {
     // ポストを10件取得
     final QuerySnapshot snapshots = await FirebaseFirestore.instance
         .collection('posts')
-        .orderBy('createdAt', descending: true)
+        .orderBy('editedAt', descending: true)
         .limit(10)
         .get();
 

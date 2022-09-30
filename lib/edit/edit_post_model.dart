@@ -111,8 +111,6 @@ class EditPostModel extends ChangeNotifier {
       'createdAt': Timestamp.now(),
       'editedAt': Timestamp.now(),
       'uid': data!['uid'],
-      'username': data['username'],
-      'userImageUrl': data['userImageUrl'] ?? '',
       'isEdited': false,
     });
   }

@@ -33,6 +33,7 @@ class RegisterPage extends StatelessWidget {
                       SizedBox(height: 8),
                       TextField(
                         controller: model.usernameController,
+                        maxLength: 24,
                         decoration: InputDecoration(
                           hintText: 'ユーザー名',
                         ),

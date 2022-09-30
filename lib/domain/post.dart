@@ -11,8 +11,6 @@ class Post {
     final editedAtTimestamp = data['editedAt'] as Timestamp;
     editedAt = editedAtTimestamp.toDate();
     uid = data['uid'];
-    username = data['username'];
-    userImageUrl = data['userImageUrl'];
     isEdited = data['isEdited'];
     documentReference = doc.reference;
   }
@@ -23,8 +21,6 @@ class Post {
   DateTime? createdAt;
   DateTime? editedAt;
   String? uid;
-  String? username;
-  String? userImageUrl;
   bool isEdited = false;
   DocumentReference? documentReference;
 }

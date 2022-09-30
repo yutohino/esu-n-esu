@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:esu_n_esu/domain/AppUser.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +8,8 @@ class HomeModel extends ChangeNotifier {
   bool isLoading = false;
   DocumentSnapshot? _fetchedLastSnapshot; // 現在取得している最後のドキュメントを保持
   bool isFetchLastItem = false;
+
+  List<AppUser> users = [];
 
   void startLoading() {
     isLoading = true;
@@ -34,11 +37,12 @@ class HomeModel extends ChangeNotifier {
     isFetchLastItem = snapshots.docs.length < 10;
 
     posts = []; // 表示中のポストを初期化
-    snapshots.docs.map((document) {
+    users = []; // ユーザー情報を初期化
+    await Future.wait(snapshots.docs.map((document) async {
       final post = Post(document);
       posts.add(post);
-      return post;
-    }).toList();
+      await _addUserInfo(post.uid!);
+    }));
     notifyListeners();
   }
 
@@ -70,12 +74,35 @@ class HomeModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 記事のユーザー情報を取得
+  AppUser? fetchPostedUserInfo(String uid) {
+    for (AppUser user in users) {
+      return user;
+    }
+    return null;
+  }
+
+  /// uidを基にユーザー情報を取得してusersに追加する
+  Future _addUserInfo(String uid) async {
+    // usersにユーザー情報がある場合
+    for (AppUser user in users) {
+      if (uid == user.uid) {
+        return;
+      }
+    }
+
+    // usersに無い場合はusersコレクションから取得する
+    final snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final user = AppUser(snapshot);
+    users.add(user);
+  }
+
   /// 取得したポストの情報とフラグをリセット
   void reset() {
     posts = [];
     _fetchedLastSnapshot = null;
     isFetchLastItem = false;
+    users = [];
   }
-
-// TODO: ログインしてるかチェック
 }

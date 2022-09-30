@@ -124,25 +124,39 @@ class MyPage extends StatelessWidget {
                               Row(
                                 children: [
                                   Container(
-                                    width: 24,
-                                    height: 24,
+                                    padding:
+                                        EdgeInsets.all(0.5), // Border width
                                     decoration: BoxDecoration(
+                                      color: Colors.black87,
                                       shape: BoxShape.circle,
-                                      border: Border.all(
-                                        width: 0.5,
-                                        color: Colors.black87,
-                                      ),
-                                      image: DecorationImage(
-                                        fit: BoxFit.fill,
-                                        image: NetworkImage(
-                                          posts[index].userImageUrl!,
+                                    ),
+                                    child: ClipOval(
+                                      child: SizedBox.fromSize(
+                                        size:
+                                            Size.fromRadius(12), // Image radius
+                                        child: Image.network(
+                                          model
+                                              .fetchPostedUserInfo(
+                                                  posts[index].uid!)!
+                                              .userImageUrl!,
+                                          errorBuilder: (BuildContext context,
+                                              Object exception,
+                                              StackTrace? stackTrace) {
+                                            return Icon(
+                                              Icons.account_circle,
+                                              color: Colors.white,
+                                            );
+                                          },
                                         ),
                                       ),
                                     ),
                                   ),
                                   SizedBox(width: 4),
                                   Text(
-                                    posts[index].username!,
+                                    'ユーザー名が入る。ユーザー名が入る。ユーザー名が',
+                                    // posts[index].username!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.black54,

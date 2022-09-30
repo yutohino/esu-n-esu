@@ -77,7 +77,7 @@ class HomePage extends StatelessWidget {
               // ポストの情報を初期化 & 最初の10件を取得
               onRefresh: () async {
                 model.reset();
-                model.firstFetchPosts();
+                await model.firstFetchPosts();
               },
               child: ListView.separated(
                 controller: controller,
@@ -148,7 +148,10 @@ class HomePage extends StatelessWidget {
                                   child: SizedBox.fromSize(
                                     size: Size.fromRadius(12), // Image radius
                                     child: Image.network(
-                                      posts[index].userImageUrl!,
+                                      model
+                                          .fetchPostedUserInfo(
+                                              posts[index].uid!)!
+                                          .userImageUrl!,
                                       errorBuilder: (BuildContext context,
                                           Object exception,
                                           StackTrace? stackTrace) {
@@ -163,7 +166,11 @@ class HomePage extends StatelessWidget {
                               ),
                               SizedBox(width: 4),
                               Text(
-                                posts[index].username!,
+                                model
+                                    .fetchPostedUserInfo(posts[index].uid!)!
+                                    .username!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.black54,

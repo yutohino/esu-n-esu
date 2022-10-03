@@ -179,7 +179,7 @@ class MyPage extends StatelessWidget {
                                   .fetchPostedUserInfo(posts[index].uid)!
                                   .userImageUrl
                               : '',
-                          12),
+                          28),
                       SizedBox(width: 4),
                       Text(
                         model.fetchPostedUserInfo(posts[index].uid) != null
@@ -233,25 +233,20 @@ class MyPage extends StatelessWidget {
 
   /// ユーザーアイコンを表示
   Widget _showUserImage(MyModel model, String userImageUrl, double size) {
-    return Container(
-      padding: EdgeInsets.all(0.5), // Border width
-      decoration: BoxDecoration(
-        color: Colors.black87,
-        shape: BoxShape.circle,
-      ),
-      child: ClipOval(
-        child: SizedBox.fromSize(
-          size: Size.fromRadius(size), // Image radius
-          child: Image.network(
-            userImageUrl,
-            errorBuilder: (BuildContext context, Object exception,
-                StackTrace? stackTrace) {
-              return Icon(
-                Icons.account_circle,
-                color: Colors.white,
-              );
-            },
-          ),
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(50),
+        child: Image.network(
+          userImageUrl,
+          errorBuilder:
+              (BuildContext context, Object exception, StackTrace? stackTrace) {
+            return Icon(
+              Icons.account_circle,
+              size: size,
+            );
+          },
         ),
       ),
     );

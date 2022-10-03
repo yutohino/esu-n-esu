@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously
 
+import 'package:esu_n_esu/content/content_page.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit/edit_post_page.dart';
 import 'package:esu_n_esu/home/home_model.dart';
@@ -127,90 +128,103 @@ class HomePage extends StatelessWidget {
         itemCount: posts.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index < posts.length) {
-            return Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    posts[index].title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
+            return GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ContentPage(posts[index]),
+                    ));
+              },
+              child: Container(
+                padding: EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      posts[index].title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    posts[index].content,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      height: 1.2,
+                    SizedBox(
+                      height: 8,
                     ),
-                  ),
-                  SizedBox(height: 4),
-                  Row(
-                    children: [
-                      for (String imageUrl in posts[index].imageUrls) ...{
-                        Container(
-                          color: Colors.black12,
-                          child: Image.network(
-                            imageUrl,
-                            height: 80,
-                            width: 80,
-                            errorBuilder: (BuildContext context,
-                                Object exception, StackTrace? stackTrace) {
-                              return Icon(
-                                Icons.image_not_supported_outlined,
-                                size: 80,
-                              );
-                            },
+                    Text(
+                      posts[index].content,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        height: 1.2,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 4,
+                    ),
+                    Row(
+                      children: [
+                        for (String imageUrl in posts[index].imageUrls) ...{
+                          Container(
+                            color: Colors.black12,
+                            child: Image.network(
+                              imageUrl,
+                              height: 80,
+                              width: 80,
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
+                                return Icon(
+                                  Icons.image_not_supported_outlined,
+                                  size: 80,
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8),
-                      },
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _showUserImage(
-                          model,
+                          SizedBox(width: 8),
+                        },
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _showUserImage(
+                            model,
+                            model.fetchPostedUserInfo(posts[index].uid) != null
+                                ? model
+                                    .fetchPostedUserInfo(posts[index].uid)!
+                                    .userImageUrl
+                                : '',
+                            28),
+                        SizedBox(width: 4),
+                        Text(
                           model.fetchPostedUserInfo(posts[index].uid) != null
                               ? model
                                   .fetchPostedUserInfo(posts[index].uid)!
-                                  .userImageUrl
+                                  .username
                               : '',
-                          28),
-                      SizedBox(width: 4),
-                      Text(
-                        model.fetchPostedUserInfo(posts[index].uid) != null
-                            ? model
-                                .fetchPostedUserInfo(posts[index].uid)!
-                                .username
-                            : '',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    '投稿日 [${DateFormat('yyyy/MM/dd').format(posts[index].createdAt!)}]',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
+                      ],
                     ),
-                  ),
-                ],
+                    SizedBox(height: 8),
+                    Text(
+                      '投稿日 [${DateFormat('yyyy/MM/dd').format(posts[index].createdAt!)}]',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           } else {
@@ -239,7 +253,7 @@ class HomePage extends StatelessWidget {
 
   /// ユーザーアイコンを表示
   Widget _showUserImage(HomeModel model, String userImageUrl, double size) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
       child: ClipRRect(

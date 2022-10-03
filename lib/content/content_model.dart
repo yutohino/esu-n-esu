@@ -8,10 +8,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class EditPostModel extends ChangeNotifier {
+class ContentModel extends ChangeNotifier {
   final Post? post;
 
-  EditPostModel(this.post) {
+  ContentModel(this.post) {
     if (post != null) {
       titleController.text = post!.title;
       contentController.text = post!.content;
@@ -121,6 +121,6 @@ class EditPostModel extends ChangeNotifier {
     // TODO: 画像の変更に応じて、Storageに画像をアップロードおよび削除をする
   }
 
-  // TODO: 編集処理
-  // TODO: アップロードした画像を削除 or 置き換えた場合、画像をStorageからも削除するようにする
+// TODO: 編集処理
+// TODO: アップロードした画像を削除 or 置き換えた場合、画像をStorageからも削除するようにする
 }

@@ -77,7 +77,9 @@ class HomeModel extends ChangeNotifier {
   /// 記事のユーザー情報を取得
   AppUser? fetchPostedUserInfo(String uid) {
     for (AppUser user in users) {
-      return user;
+      if (uid == user.uid) {
+        return user;
+      }
     }
     return null;
   }

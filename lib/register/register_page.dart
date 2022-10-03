@@ -44,6 +44,7 @@ class RegisterPage extends StatelessWidget {
                       SizedBox(height: 8),
                       TextField(
                         controller: model.authorController,
+                        maxLength: 20,
                         decoration: InputDecoration(
                           hintText: 'パスワード',
                         ),

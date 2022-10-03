@@ -43,7 +43,15 @@ class HomePage extends StatelessWidget {
                     }
                   }
                 },
-                icon: Icon(Icons.account_circle_outlined),
+                icon: FirebaseAuth.instance.currentUser != null
+                    ? _showUserImage(
+                        model,
+                        model
+                            .fetchPostedUserInfo(
+                                FirebaseAuth.instance.currentUser!.uid)!
+                            .userImageUrl!,
+                        26)
+                    : Icon(Icons.account_circle_outlined),
                 iconSize: 36,
               );
             }),
@@ -138,32 +146,12 @@ class HomePage extends StatelessWidget {
                           SizedBox(height: 8),
                           Row(
                             children: [
-                              Container(
-                                padding: EdgeInsets.all(0.5), // Border width
-                                decoration: BoxDecoration(
-                                  color: Colors.black87,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: ClipOval(
-                                  child: SizedBox.fromSize(
-                                    size: Size.fromRadius(12), // Image radius
-                                    child: Image.network(
-                                      model
-                                          .fetchPostedUserInfo(
-                                              posts[index].uid!)!
-                                          .userImageUrl!,
-                                      errorBuilder: (BuildContext context,
-                                          Object exception,
-                                          StackTrace? stackTrace) {
-                                        return Icon(
-                                          Icons.account_circle,
-                                          color: Colors.white,
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              _showUserImage(
+                                  model,
+                                  model
+                                      .fetchPostedUserInfo(posts[index].uid!)!
+                                      .userImageUrl!,
+                                  12),
                               SizedBox(width: 4),
                               Text(
                                 model
@@ -241,11 +229,38 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  /// 成功スナックバーを表示
   void _showSuccessSnackBar(BuildContext context, String message) {
     final snackBar = SnackBar(
       content: Text(message),
       backgroundColor: Colors.green,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  /// ユーザーアイコンを表示
+  Widget _showUserImage(HomeModel model, String userImageUrl, double size) {
+    return Container(
+      padding: EdgeInsets.all(0.5), // Border width
+      decoration: BoxDecoration(
+        color: Colors.black87,
+        shape: BoxShape.circle,
+      ),
+      child: ClipOval(
+        child: SizedBox.fromSize(
+          size: Size.fromRadius(size), // Image radius
+          child: Image.network(
+            userImageUrl,
+            errorBuilder: (BuildContext context, Object exception,
+                StackTrace? stackTrace) {
+              return Icon(
+                Icons.account_circle,
+                color: Colors.white,
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 }

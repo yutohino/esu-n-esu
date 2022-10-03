@@ -15,12 +15,12 @@ class Post {
     documentReference = doc.reference;
   }
 
-  String? title;
-  String? content;
-  List<String>? imageUrls;
+  String title = '';
+  String content = '';
+  List<String> imageUrls = [];
   DateTime? createdAt;
   DateTime? editedAt;
-  String? uid;
+  String uid = '';
   bool isEdited = false;
   DocumentReference? documentReference;
 }

@@ -41,7 +41,7 @@ class HomeModel extends ChangeNotifier {
     await Future.wait(snapshots.docs.map((document) async {
       final post = Post(document);
       posts.add(post);
-      await _addUserInfo(post.uid!);
+      await _addUserInfo(post.uid);
     }));
     notifyListeners();
   }

@@ -9,8 +9,8 @@ class AppUser {
     userImageUrl = data['userImageUrl'];
   }
 
-  String? uid;
-  String? email;
-  String? username;
-  String? userImageUrl;
+  String uid = '';
+  String email = '';
+  String username = '';
+  String userImageUrl = '';
 }

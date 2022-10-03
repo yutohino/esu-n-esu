@@ -49,7 +49,7 @@ class HomePage extends StatelessWidget {
                         model
                             .fetchPostedUserInfo(
                                 FirebaseAuth.instance.currentUser!.uid)!
-                            .userImageUrl!,
+                            .userImageUrl,
                         26)
                     : Icon(Icons.account_circle_outlined),
                 iconSize: 36,
@@ -100,7 +100,7 @@ class HomePage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            posts[index].title!,
+                            posts[index].title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -111,7 +111,7 @@ class HomePage extends StatelessWidget {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            posts[index].content!,
+                            posts[index].content,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -122,7 +122,7 @@ class HomePage extends StatelessWidget {
                           Row(
                             children: [
                               for (String imageUrl
-                                  in posts[index].imageUrls!) ...{
+                                  in posts[index].imageUrls) ...{
                                 Container(
                                   color: Colors.black12,
                                   child: Image.network(
@@ -148,15 +148,22 @@ class HomePage extends StatelessWidget {
                             children: [
                               _showUserImage(
                                   model,
-                                  model
-                                      .fetchPostedUserInfo(posts[index].uid!)!
-                                      .userImageUrl!,
+                                  model.fetchPostedUserInfo(posts[index].uid) !=
+                                          null
+                                      ? model
+                                          .fetchPostedUserInfo(
+                                              posts[index].uid)!
+                                          .userImageUrl
+                                      : '',
                                   12),
                               SizedBox(width: 4),
                               Text(
-                                model
-                                    .fetchPostedUserInfo(posts[index].uid!)!
-                                    .username!,
+                                model.fetchPostedUserInfo(posts[index].uid) !=
+                                        null
+                                    ? model
+                                        .fetchPostedUserInfo(posts[index].uid)!
+                                        .username
+                                    : '',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(

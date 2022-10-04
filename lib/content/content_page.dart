@@ -88,41 +88,50 @@ class ContentPage extends StatelessWidget {
                       ),
                     ),
                   SizedBox(
-                    height: 8,
+                    height: 4,
                   ),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: Image.network(
-                            user.userImageUrl,
-                            errorBuilder: (BuildContext context,
-                                Object exception, StackTrace? stackTrace) {
-                              return Icon(
-                                Icons.account_circle,
-                                size: 36,
-                              );
-                            },
+                  InkWell(
+                    onTap: () {
+                      // TODO: ポストを投稿したユーザーのページに移動
+                    },
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(0, 5, 20, 5),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.network(
+                                user.userImageUrl,
+                                errorBuilder: (BuildContext context,
+                                    Object exception, StackTrace? stackTrace) {
+                                  return Icon(
+                                    Icons.account_circle,
+                                    size: 36,
+                                  );
+                                },
+                              ),
+                            ),
                           ),
-                        ),
+                          SizedBox(width: 4),
+                          Text(
+                            user.username,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 4),
-                      Text(
-                        user.username,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                   SizedBox(
-                    height: 16,
+                    height: 12,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -155,9 +164,9 @@ class ContentPage extends StatelessWidget {
                       // TODO: ブックマークとして登録する
                     },
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.lightBlueAccent,
+                      foregroundColor: Palette.mainColor,
                       shape: StadiumBorder(),
-                      side: BorderSide(color: Colors.lightBlueAccent),
+                      side: BorderSide(color: Palette.mainColor),
                       padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                     ),
                     child: Row(
@@ -176,7 +185,7 @@ class ContentPage extends StatelessWidget {
                       // TODO: ブックマークを解除する
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlueAccent,
+                      backgroundColor: Palette.mainColor,
                       foregroundColor: Colors.white,
                       shape: StadiumBorder(),
                       padding: EdgeInsets.fromLTRB(10, 10, 10, 10),

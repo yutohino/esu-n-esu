@@ -1,12 +1,16 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, iterable_contains_unrelated_type
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, iterable_contains_unrelated_type, use_build_context_synchronously
 
 import 'package:esu_n_esu/content/content_model.dart';
 import 'package:esu_n_esu/domain/post.dart';
+import 'package:esu_n_esu/edit/edit_post_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+enum Menu { post_edit }
+
 class ContentPage extends StatelessWidget {
-  final Post? post;
+  final Post post;
 
   ContentPage(this.post);
 
@@ -18,10 +22,30 @@ class ContentPage extends StatelessWidget {
         appBar: AppBar(
           title: Text('投稿内容'),
           actions: [
-            Consumer<ContentModel>(builder: (context, model, child) {
-              // TODO: 自分の記事の場合は編集ボタンを表示「...」をタップしたら「編集」を表示する
-              return Container();
-            }),
+            if (FirebaseAuth.instance.currentUser != null &&
+                post.uid == FirebaseAuth.instance.currentUser!.uid)
+              Consumer<ContentModel>(builder: (context, model, child) {
+                return PopupMenuButton(
+                  onSelected: (Menu selectedItem) async {
+                    String? editedMessage = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditPostPage(post),
+                        ));
+                    if (editedMessage != null) {
+                      _showSuccessSnackBar(context, editedMessage);
+                      // TODO: 内容を更新する
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<Menu>>[
+                    PopupMenuItem<Menu>(
+                      value: Menu.post_edit,
+                      child: Text('編集'),
+                    ),
+                  ],
+                  icon: Icon(Icons.more_vert),
+                );
+              }),
           ],
         ),
         body: Container(
@@ -170,5 +194,14 @@ class ContentPage extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// 成功スナックバーを表示
+  void _showSuccessSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.green,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

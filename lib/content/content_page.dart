@@ -159,11 +159,11 @@ class ContentPage extends StatelessWidget {
                     height: 32,
                   ),
                   // TODO: ブックマーク済みと未ブックマークで表示を変える
-                  OutlinedButton(
+                  TextButton(
                     onPressed: () {
                       // TODO: ブックマークとして登録する
                     },
-                    style: ElevatedButton.styleFrom(
+                    style: TextButton.styleFrom(
                       foregroundColor: Palette.mainColor,
                       shape: StadiumBorder(),
                       side: BorderSide(color: Palette.mainColor),
@@ -180,11 +180,11 @@ class ContentPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  ElevatedButton(
+                  TextButton(
                     onPressed: () {
                       // TODO: ブックマークを解除する
                     },
-                    style: ElevatedButton.styleFrom(
+                    style: TextButton.styleFrom(
                       backgroundColor: Palette.mainColor,
                       foregroundColor: Colors.white,
                       shape: StadiumBorder(),

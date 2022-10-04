@@ -208,19 +208,13 @@ class HomePage extends StatelessWidget {
                       children: [
                         _showUserImage(
                             model,
-                            model.getPostedUserInfo(posts[index].uid) != null
-                                ? model
-                                    .getPostedUserInfo(posts[index].uid)!
-                                    .userImageUrl
-                                : '',
+                            model
+                                .getPostedUserInfo(posts[index].uid)!
+                                .userImageUrl,
                             28),
                         SizedBox(width: 4),
                         Text(
-                          model.getPostedUserInfo(posts[index].uid) != null
-                              ? model
-                                  .getPostedUserInfo(posts[index].uid)!
-                                  .username
-                              : '',
+                          model.getPostedUserInfo(posts[index].uid)!.username,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -285,6 +279,12 @@ class HomePage extends StatelessWidget {
 
   /// ユーザーアイコンを表示
   Widget _showUserImage(HomeModel model, String userImageUrl, double size) {
+    if (userImageUrl.isEmpty) {
+      return Icon(
+        Icons.account_circle,
+        size: size,
+      );
+    }
     return SizedBox(
       width: size,
       height: size,

@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_key_in_widget_constructors, use_build_context_synchronously
 
+import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/login/login_model.dart';
 import 'package:esu_n_esu/register/register_page.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ class LoginPage extends StatelessWidget {
       create: (_) => LoginModel(),
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Palette.mainColor,
           title: Text('ログイン'),
         ),
         body: Center(
@@ -44,6 +46,9 @@ class LoginPage extends StatelessWidget {
                       ),
                       SizedBox(height: 16),
                       ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Palette.mainColor,
+                        ),
                         onPressed: () async {
                           try {
                             model.startLoading();
@@ -74,7 +79,12 @@ class LoginPage extends StatelessWidget {
                             Navigator.pop(context, registeredMessage);
                           }
                         },
-                        child: Text('新規登録の方はこちら'),
+                        child: Text(
+                          '新規登録の方はこちら',
+                          style: TextStyle(
+                            color: Palette.mainColor,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -83,7 +93,9 @@ class LoginPage extends StatelessWidget {
                   Container(
                     color: Colors.black54,
                     child: Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                        color: Palette.mainColor,
+                      ),
                     ),
                   ),
               ],

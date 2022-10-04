@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, iterable_contains_unrelated_type
 
+import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit/edit_post_model.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class EditPostPage extends StatelessWidget {
       create: (_) => EditPostModel(post),
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Palette.mainColor,
           title: Text(post == null ? '新規投稿作成' : '編集'),
           actions: [
             Consumer<EditPostModel>(builder: (context, model, child) {
@@ -134,7 +136,9 @@ class EditPostPage extends StatelessWidget {
                     // height: double.infinity,
                     color: Colors.black54,
                     child: Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                        color: Palette.mainColor,
+                      ),
                     ),
                   );
                 }

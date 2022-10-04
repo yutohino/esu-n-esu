@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously
 
+import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_page.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit/edit_post_page.dart';
@@ -18,9 +19,18 @@ class HomePage extends StatelessWidget {
       create: (_) => HomeModel()..firstFetchPosts(),
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Palette.mainColor,
           title: Text('ホーム'),
           actions: [
             Consumer<HomeModel>(builder: (context, model, child) {
+              // ログインしているユーザー情報が取得できるまで、ログインボタンを表示しない
+              if (FirebaseAuth.instance.currentUser != null) {
+                if (model.getMyUserInfo(
+                        FirebaseAuth.instance.currentUser!.uid) ==
+                    null) {
+                  return SizedBox();
+                }
+              }
               return IconButton(
                 onPressed: () async {
                   if (FirebaseAuth.instance.currentUser != null) {
@@ -49,7 +59,7 @@ class HomePage extends StatelessWidget {
                     ? _showUserImage(
                         model,
                         model
-                            .fetchPostedUserInfo(
+                            .getMyUserInfo(
                                 FirebaseAuth.instance.currentUser!.uid)!
                             .userImageUrl,
                         36)
@@ -65,7 +75,9 @@ class HomePage extends StatelessWidget {
             if (posts.isEmpty) {
               if (!model.isFetchLastItem) {
                 // ポストを取得するまでサークルを表示
-                return CircularProgressIndicator();
+                return CircularProgressIndicator(
+                  color: Palette.mainColor,
+                );
               }
             }
 
@@ -92,6 +104,7 @@ class HomePage extends StatelessWidget {
             return Container();
           }
           return FloatingActionButton(
+            backgroundColor: Palette.mainColor,
             onPressed: () async {
               String? uploadMessage = await Navigator.push(
                   context,
@@ -134,7 +147,8 @@ class HomePage extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ContentPage(posts[index]),
+                      builder: (context) => ContentPage(posts[index],
+                          model.getPostedUserInfo(posts[index].uid)!),
                     ));
               },
               child: Container(
@@ -184,7 +198,8 @@ class HomePage extends StatelessWidget {
                               },
                             ),
                           ),
-                          SizedBox(width: 8),
+                          if (imageUrl != posts[index].imageUrls.last)
+                            SizedBox(width: 8),
                         },
                       ],
                     ),
@@ -193,17 +208,17 @@ class HomePage extends StatelessWidget {
                       children: [
                         _showUserImage(
                             model,
-                            model.fetchPostedUserInfo(posts[index].uid) != null
+                            model.getPostedUserInfo(posts[index].uid) != null
                                 ? model
-                                    .fetchPostedUserInfo(posts[index].uid)!
+                                    .getPostedUserInfo(posts[index].uid)!
                                     .userImageUrl
                                 : '',
                             28),
                         SizedBox(width: 4),
                         Text(
-                          model.fetchPostedUserInfo(posts[index].uid) != null
+                          model.getPostedUserInfo(posts[index].uid) != null
                               ? model
-                                  .fetchPostedUserInfo(posts[index].uid)!
+                                  .getPostedUserInfo(posts[index].uid)!
                                   .username
                               : '',
                           maxLines: 1,
@@ -216,12 +231,27 @@ class HomePage extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 8),
-                    Text(
-                      '投稿日 [${DateFormat('yyyy/MM/dd').format(posts[index].createdAt!)}]',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '投稿日 [${DateFormat('yyyy/MM/dd').format(posts[index].createdAt!)}]',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        if (posts[index].isEdited)
+                          Text(
+                            '編集日 [${DateFormat('yyyy/MM/dd').format(posts[index].editedAt!)}]',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -236,7 +266,9 @@ class HomePage extends StatelessWidget {
               return SizedBox(
                 height: 100,
                 child: Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(
+                    color: Palette.mainColor,
+                  ),
                 ),
               );
             }

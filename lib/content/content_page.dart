@@ -1,18 +1,22 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, iterable_contains_unrelated_type, use_build_context_synchronously
 
+import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_model.dart';
+import 'package:esu_n_esu/domain/AppUser.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit/edit_post_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-enum Menu { post_edit }
+enum Menu { postEdit }
 
 class ContentPage extends StatelessWidget {
   final Post post;
+  final AppUser user;
 
-  ContentPage(this.post);
+  ContentPage(this.post, this.user);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +24,8 @@ class ContentPage extends StatelessWidget {
       create: (_) => ContentModel(post),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('投稿内容'),
+          backgroundColor: Palette.mainColor,
+          title: Text(post.title),
           actions: [
             if (FirebaseAuth.instance.currentUser != null &&
                 post.uid == FirebaseAuth.instance.currentUser!.uid)
@@ -39,7 +44,7 @@ class ContentPage extends StatelessWidget {
                   },
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<Menu>>[
                     PopupMenuItem<Menu>(
-                      value: Menu.post_edit,
+                      value: Menu.postEdit,
                       child: Text('編集'),
                     ),
                   ],
@@ -49,64 +54,143 @@ class ContentPage extends StatelessWidget {
           ],
         ),
         body: Container(
-          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+          padding: EdgeInsets.fromLTRB(15, 10, 15, 0),
           alignment: Alignment.topCenter,
           child: SingleChildScrollView(
             child: Consumer<ContentModel>(builder: (context, model, child) {
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextField(
-                    controller: model.titleController,
-                    maxLength: 50,
+                  Text(
+                    post.title,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
                     ),
-                    decoration: InputDecoration(
-                      hintText: 'タイトル',
-                    ),
-                    onChanged: (text) {
-                      model.setTitle(text);
-                    },
                   ),
-                  SizedBox(height: 8),
-                  TextField(
-                    controller: model.contentController,
-                    maxLength: 2200,
-                    maxLines: 20,
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Text(
+                    '投稿日 [${DateFormat('yyyy/MM/dd').format(post.createdAt!)}]',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 14,
+                      color: Colors.black54,
                     ),
-                    decoration: InputDecoration(
-                      hintText: '内容',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (text) {
-                      model.setContent(text);
-                    },
                   ),
-                  SizedBox(height: 8),
+                  if (post.isEdited)
+                    Text(
+                      '編集日 [${DateFormat('yyyy/MM/dd').format(post.editedAt!)}]',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Image.network(
+                            user.userImageUrl,
+                            errorBuilder: (BuildContext context,
+                                Object exception, StackTrace? stackTrace) {
+                              return Icon(
+                                Icons.account_circle,
+                                size: 36,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        user.username,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 16,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      for (int index = 0; index < 4; index++) ...{
-                        if (model.imageFiles.containsKey(index)) ...{
-                          // 端末から取得した画像
-                          _pickedImageBox(context, model, index),
-                        } else if (model.post != null &&
-                            model.post!.imageUrls.contains(index)) ...{
-                          // アップロード済みの画像
-                          _uploadedImageBox(context, model, index)
-                        } else ...{
-                          // 画像なし
-                          _emptyImageBox(model, index),
-                        },
-                        if (index < 3) ...{
+                      for (String imageUrl in post.imageUrls) ...{
+                        _uploadedImageBox(context, imageUrl),
+                        if (post.imageUrls.length == 1 ||
+                            imageUrl != post.imageUrls.last)
                           Expanded(
                             child: SizedBox(),
                           ),
-                        },
                       },
                     ],
+                  ),
+                  SizedBox(
+                    height: 32,
+                  ),
+                  Text(
+                    post.content,
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 32,
+                  ),
+                  // TODO: ブックマーク済みと未ブックマークで表示を変える
+                  OutlinedButton(
+                    onPressed: () {
+                      // TODO: ブックマークとして登録する
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.lightBlueAccent,
+                      shape: StadiumBorder(),
+                      side: BorderSide(color: Colors.lightBlueAccent),
+                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.bookmark_add_outlined),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        Text('ブックマーク'),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // TODO: ブックマークを解除する
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.lightBlueAccent,
+                      foregroundColor: Colors.white,
+                      shape: StadiumBorder(),
+                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.bookmark),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        Text('ブックマーク'),
+                      ],
+                    ),
                   ),
                   SizedBox(
                     height: 32,
@@ -120,79 +204,17 @@ class ContentPage extends StatelessWidget {
     );
   }
 
-  Widget _emptyImageBox(ContentModel model, int index) {
+  Widget _uploadedImageBox(BuildContext context, String imageUrl) {
     return GestureDetector(
-      onTap: () async {
-        await model.pickImage(index);
+      onTap: () {
+        // TODO: ポップアップ表示的なことをする
       },
       child: Container(
         height: 80,
         width: 80,
         color: Colors.black12,
+        child: Image.network(imageUrl),
       ),
-    );
-  }
-
-  Widget _pickedImageBox(BuildContext context, ContentModel model, int index) {
-    return GestureDetector(
-      onTap: () {
-        _showChangeOrDeleteImageDialog(context, model, index);
-      },
-      child: Container(
-        height: 80,
-        width: 80,
-        color: Colors.black12,
-        child: Image.file(model.imageFiles[index]!),
-      ),
-    );
-  }
-
-  Widget _uploadedImageBox(
-      BuildContext context, ContentModel model, int index) {
-    return GestureDetector(
-      onTap: () {
-        _showChangeOrDeleteImageDialog(context, model, index);
-      },
-      child: Container(
-          height: 80,
-          width: 80,
-          color: Colors.black12,
-          child: Image.network(model.post!.imageUrls[index])),
-    );
-  }
-
-  /// 画像を変更 or 削除の確認ダイアログ
-  Future _showChangeOrDeleteImageDialog(
-      BuildContext context, ContentModel model, int index) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Text('$index番目の画像を削除または変更しますか?'),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: Text('変更'),
-              onPressed: () async {
-                Navigator.pop(context);
-                await model.pickImage(index);
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: Text('削除'),
-              onPressed: () {
-                Navigator.pop(context);
-                model.deleteImage(index);
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 

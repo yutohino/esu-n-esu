@@ -9,14 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ContentModel extends ChangeNotifier {
-  final Post? post;
+  final Post post;
 
   ContentModel(this.post) {
-    if (post != null) {
-      titleController.text = post!.title;
-      contentController.text = post!.content;
-      imageUrls = post!.imageUrls;
-    }
+    titleController.text = post.title;
+    contentController.text = post.content;
+    imageUrls = post.imageUrls;
   }
 
   bool isUploading = false;

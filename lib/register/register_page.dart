@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_key_in_widget_constructors, use_build_context_synchronously
 
+import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/register/register_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ class RegisterPage extends StatelessWidget {
       create: (_) => RegisterModel(),
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Palette.mainColor,
           title: Text('新規登録'),
         ),
         body: Center(
@@ -55,6 +57,9 @@ class RegisterPage extends StatelessWidget {
                       ),
                       SizedBox(height: 16),
                       ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Palette.mainColor,
+                        ),
                         onPressed: () async {
                           model.startLoading();
                           // アカウント登録
@@ -90,7 +95,9 @@ class RegisterPage extends StatelessWidget {
                   Container(
                     color: Colors.black54,
                     child: Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                        color: Palette.mainColor,
+                      ),
                     ),
                   ),
               ],

@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously
 
+import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit/edit_post_page.dart';
 import 'package:esu_n_esu/my/my_model.dart';
@@ -15,6 +16,7 @@ class MyPage extends StatelessWidget {
       create: (_) => MyModel(),
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Palette.mainColor,
           title: Text('マイページ'),
           actions: [
             Consumer<MyModel>(builder: (context, model, child) {
@@ -43,7 +45,9 @@ class MyPage extends StatelessWidget {
                 if (posts.isEmpty) {
                   if (!model.isFetchLastItem) {
                     // ポストを取得するまでサークルを表示
-                    return CircularProgressIndicator();
+                    return CircularProgressIndicator(
+                      color: Palette.mainColor,
+                    );
                   }
                 }
 
@@ -70,7 +74,9 @@ class MyPage extends StatelessWidget {
                 return Container(
                   color: Colors.black54,
                   child: Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      color: Palette.mainColor,
+                    ),
                   ),
                 );
               } else {
@@ -85,6 +91,7 @@ class MyPage extends StatelessWidget {
             return Container();
           }
           return FloatingActionButton(
+            backgroundColor: Palette.mainColor,
             onPressed: () async {
               String? uploadMessage = await Navigator.push(
                   context,
@@ -216,7 +223,9 @@ class MyPage extends StatelessWidget {
               return SizedBox(
                 height: 100,
                 child: Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(
+                    color: Palette.mainColor,
+                  ),
                 ),
               );
             }

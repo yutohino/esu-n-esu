@@ -106,7 +106,7 @@ class EditPostPage extends StatelessWidget {
                               // 端末から取得した画像
                               _pickedImageBox(context, model, index),
                             } else if (model.post != null &&
-                                model.post!.imageUrls.contains(index)) ...{
+                                index < model.uploadedImageUrls.length) ...{
                               // アップロード済みの画像
                               _uploadedImageBox(context, model, index)
                             } else ...{
@@ -188,7 +188,7 @@ class EditPostPage extends StatelessWidget {
           height: 80,
           width: 80,
           color: Colors.black12,
-          child: Image.network(model.post!.imageUrls[index])),
+          child: Image.network(model.uploadedImageUrls[index])),
     );
   }
 

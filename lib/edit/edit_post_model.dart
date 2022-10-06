@@ -13,9 +13,18 @@ class EditPostModel extends ChangeNotifier {
 
   EditPostModel(this.post) {
     if (post != null) {
+      title = post!.title;
+      content = post!.content;
       titleController.text = post!.title;
       contentController.text = post!.content;
-      imageUrls = post!.imageUrls;
+      for (int index = 0; index < post!.imageUrls.length; index++) {
+        imageUrls[index] = post!.imageUrls[0];
+      }
+      int index = 0;
+      for (var imageUrl in post!.imageUrls) {
+        imageUrls[index] = imageUrl;
+        index++;
+      }
     }
   }
 
@@ -24,9 +33,10 @@ class EditPostModel extends ChangeNotifier {
   final titleController = TextEditingController();
   final contentController = TextEditingController();
 
-  String? title;
-  String? content;
-  List<String> imageUrls = [];
+  String title = '';
+  String content = '';
+  Map<int, String> imageUrls = {};
+  bool isChangeImage = false;
 
   final imagePicker = ImagePicker();
   Map<int, File> imageFiles = {};
@@ -51,21 +61,25 @@ class EditPostModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future getUploadedImage() async {
-    // TODO: 画像取得処理(投稿済みのポストから) ※編集機能を作成時に実装する
-    return null;
-  }
-
   Future pickImage(int index) async {
     final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       imageFiles.addAll({index: File(pickedFile.path)});
       notifyListeners();
+      if (post != null) {
+        isChangeImage = true;
+      }
     }
   }
 
   bool isUpdated() {
-    return title != null || content != null;
+    if (post != null) {
+      return title.isNotEmpty && content.isNotEmpty && post!.title != title ||
+          post!.content != content ||
+          isChangeImage;
+    } else {
+      return title.isNotEmpty && content.isNotEmpty;
+    }
   }
 
   /// アップロードした画像、または端末から取得した画像を削除
@@ -73,8 +87,8 @@ class EditPostModel extends ChangeNotifier {
     if (imageFiles.containsKey(index)) {
       imageFiles.remove(index);
     } else {
-      imageUrls.removeAt(index);
-      // TODO: 削除した画像のURLを記憶して、編集保存時にStorageの削除処理をする
+      imageUrls.remove(index);
+      isChangeImage = true;
     }
     notifyListeners();
   }
@@ -86,6 +100,7 @@ class EditPostModel extends ChangeNotifier {
     // 追加した画像をアップロード
     List<String> imageUrls = [];
     if (imageFiles.isNotEmpty) {
+      // TODO: 位置が変わっただけで、同じ画像がある場合はアップロードしない
       // インデックスの順番に並び替える
       imageFiles = SplayTreeMap.from(imageFiles, (a, b) => a.compareTo(b));
       for (File imageFile in imageFiles.values) {
@@ -95,7 +110,6 @@ class EditPostModel extends ChangeNotifier {
         final imgUrl = await task.ref.getDownloadURL();
         imageUrls.add(imgUrl);
       }
-      this.imageUrls = imageUrls;
     }
 
     // Firestoreにポストをアップロード
@@ -107,7 +121,7 @@ class EditPostModel extends ChangeNotifier {
     await collection.add({
       'title': title,
       'content': content,
-      'imageUrls': this.imageUrls,
+      'imageUrls': imageUrls,
       'createdAt': Timestamp.now(),
       'editedAt': Timestamp.now(),
       'uid': data!['uid'],

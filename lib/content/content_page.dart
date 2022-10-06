@@ -91,8 +91,22 @@ class ContentPage extends StatelessWidget {
                     height: 4,
                   ),
                   InkWell(
-                    onTap: () {
+                    onTap: () async {
                       // TODO: ポストを投稿したユーザーのページに移動
+                      Post? editedPostInfo = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditPostPage(post),
+                          ));
+                      // TODO: 更新、削除の挙動を実装
+                      // if (message == 'edited') {
+                      //   _showSuccessSnackBar(context, 'ポストを編集しました');
+                      //   model.fetchPostInfo();
+                      // }
+                      // if (editedPostInfo == null) {
+                      //   _showSuccessSnackBar(context, 'ポストを削除しました');
+                      //   Navigator.pop(context);
+                      // }
                     },
                     child: Container(
                       padding: EdgeInsets.fromLTRB(0, 5, 20, 5),
@@ -134,14 +148,13 @@ class ContentPage extends StatelessWidget {
                     height: 12,
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       for (String imageUrl in post.imageUrls) ...{
                         _uploadedImageBox(context, imageUrl),
                         if (post.imageUrls.length == 1 ||
                             imageUrl != post.imageUrls.last)
-                          Expanded(
-                            child: SizedBox(),
+                          SizedBox(
+                            width: 8,
                           ),
                       },
                     ],

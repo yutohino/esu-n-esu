@@ -106,7 +106,7 @@ class EditPostPage extends StatelessWidget {
                               // 端末から取得した画像
                               _pickedImageBox(context, model, index),
                             } else if (model.post != null &&
-                                index < model.uploadedImageUrls.length) ...{
+                                index < model.imageUrls.length) ...{
                               // アップロード済みの画像
                               _uploadedImageBox(context, model, index)
                             } else ...{
@@ -188,7 +188,7 @@ class EditPostPage extends StatelessWidget {
           height: 80,
           width: 80,
           color: Colors.black12,
-          child: Image.network(model.uploadedImageUrls[index])),
+          child: Image.network(model.imageUrls[index]!)),
     );
   }
 
@@ -199,7 +199,7 @@ class EditPostPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          content: Text('$index番目の画像を削除または変更しますか?'),
+          content: Text('${index + 1}番目の画像を削除または変更しますか?'),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(

@@ -17,9 +17,6 @@ class EditPostModel extends ChangeNotifier {
       content = post!.content;
       titleController.text = post!.title;
       contentController.text = post!.content;
-      for (int index = 0; index < post!.imageUrls.length; index++) {
-        imageUrls[index] = post!.imageUrls[0];
-      }
       int index = 0;
       for (var imageUrl in post!.imageUrls) {
         imageUrls[index] = imageUrl;
@@ -40,6 +37,7 @@ class EditPostModel extends ChangeNotifier {
 
   final imagePicker = ImagePicker();
   Map<int, File> imageFiles = {};
+  List<String> deleteImageUrls = [];
 
   void startUploading() {
     isUploading = true;
@@ -67,6 +65,7 @@ class EditPostModel extends ChangeNotifier {
       imageFiles.addAll({index: File(pickedFile.path)});
       notifyListeners();
       if (post != null) {
+        imageUrls.remove(index);
         isChangeImage = true;
       }
     }
@@ -100,7 +99,6 @@ class EditPostModel extends ChangeNotifier {
     // 追加した画像をアップロード
     List<String> imageUrls = [];
     if (imageFiles.isNotEmpty) {
-      // TODO: 位置が変わっただけで、同じ画像がある場合はアップロードしない
       // インデックスの順番に並び替える
       imageFiles = SplayTreeMap.from(imageFiles, (a, b) => a.compareTo(b));
       for (File imageFile in imageFiles.values) {
@@ -112,7 +110,7 @@ class EditPostModel extends ChangeNotifier {
       }
     }
 
-    // Firestoreにポストをアップロード
+    // Firestoreに新規ポストをアップロード
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final snapshot =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
@@ -129,10 +127,48 @@ class EditPostModel extends ChangeNotifier {
     });
   }
 
-  /// 投稿済みポストを編集完了
+  /// 投稿済みポストの編集をアップロード
   Future uploadExistingPost() async {
-    // TODO: Firestoreにアップロード
-    // TODO: 画像の変更に応じて、Storageに画像をアップロードおよび削除をする
+    final doc = FirebaseFirestore.instance.collection('posts').doc(post!.id);
+    List<String> imageUrlsList = [];
+    if (!isChangeImage) {
+      imageUrlsList.addAll(post!.imageUrls);
+    } else {
+      // 変更 or 削除された画像をStorageから削除
+      for (String deleteImageUrl in deleteImageUrls) {
+        final storageRef = FirebaseStorage.instance.ref();
+        // TODO: サーバーのファイルパスを指定する必要あり
+        await storageRef.child(deleteImageUrl).delete();
+      }
+
+      // 追加した画像をアップロード
+      Map<int, String> imageUrls = {};
+      for (final data in imageFiles.entries) {
+        final index = data.key;
+        final imageFile = data.value;
+        final task = await FirebaseStorage.instance
+            .ref('posts/${doc.id}${imageFile.hashCode}')
+            .putFile(imageFile);
+        final imgUrl = await task.ref.getDownloadURL();
+        imageUrls[index] = imgUrl;
+      }
+      // 既存の画像とアップロードした画像のMapを結合 & インデックスの順番に並び替える
+      this.imageUrls.addAll(imageUrls);
+      SplayTreeMap.from(this.imageUrls, (int a, int b) => a.compareTo(b));
+      // MapからListに変換
+      for (var imageUrl in this.imageUrls.values) {
+        imageUrlsList.add(imageUrl);
+      }
+    }
+
+    // Firestoreに更新したポストをアップロード
+    await FirebaseFirestore.instance.collection('posts').doc(post!.id).update({
+      'title': title,
+      'content': content,
+      'imageUrls': imageUrlsList,
+      'editedAt': Timestamp.now(),
+      'isEdited': true,
+    });
   }
 
   // TODO: 編集処理

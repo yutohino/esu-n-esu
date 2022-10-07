@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Post {
   Post(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
+    id = doc.id;
     title = data['title'];
     content = data['content'];
     imageUrls = List.from(data['imageUrls']);
@@ -12,9 +13,9 @@ class Post {
     editedAt = editedAtTimestamp.toDate();
     uid = data['uid'];
     isEdited = data['isEdited'];
-    documentReference = doc.reference;
   }
 
+  String id = '';
   String title = '';
   String content = '';
   List<String> imageUrls = [];
@@ -22,5 +23,4 @@ class Post {
   DateTime? editedAt;
   String uid = '';
   bool isEdited = false;
-  DocumentReference? documentReference;
 }

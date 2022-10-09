@@ -25,9 +25,7 @@ class HomePage extends StatelessWidget {
             Consumer<HomeModel>(builder: (context, model, child) {
               // ログインしているユーザー情報が取得できるまで、ログインボタンを表示しない
               if (FirebaseAuth.instance.currentUser != null) {
-                if (model.getMyUserInfo(
-                        FirebaseAuth.instance.currentUser!.uid) ==
-                    null) {
+                if (model.getMyUserInfo() == null) {
                   return SizedBox();
                 }
               }
@@ -57,12 +55,7 @@ class HomePage extends StatelessWidget {
                 },
                 icon: FirebaseAuth.instance.currentUser != null
                     ? _showUserImage(
-                        model,
-                        model
-                            .getMyUserInfo(
-                                FirebaseAuth.instance.currentUser!.uid)!
-                            .userImageUrl,
-                        36)
+                        model, model.getMyUserInfo()!.userImageUrl, 36)
                     : Icon(Icons.account_circle_outlined),
                 iconSize: 36,
               );

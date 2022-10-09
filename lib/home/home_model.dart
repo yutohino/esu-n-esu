@@ -23,7 +23,9 @@ class HomeModel extends ChangeNotifier {
 
   /// ポストを10件取得(初回)
   Future firstFetchPosts() async {
-    await _checkMyUserInfo(FirebaseAuth.instance.currentUser!.uid);
+    if (FirebaseAuth.instance.currentUser != null) {
+      await _checkMyUserInfo(FirebaseAuth.instance.currentUser!.uid);
+    }
 
     // ポストを10件取得
     final QuerySnapshot snapshots = await FirebaseFirestore.instance
@@ -113,11 +115,10 @@ class HomeModel extends ChangeNotifier {
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
     final user = AppUser(snapshot);
     myUserInfo = user;
-    return myUserInfo;
   }
 
   /// ログインしているユーザー情報を取得
-  AppUser? getMyUserInfo(String uid) {
+  AppUser? getMyUserInfo() {
     return myUserInfo;
   }
 

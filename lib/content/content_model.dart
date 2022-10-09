@@ -1,10 +1,11 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:flutter/material.dart';
 
 class ContentModel extends ChangeNotifier {
-  final Post post;
+  Post post;
 
   ContentModel(this.post) {
     titleController.text = post.title;
@@ -22,4 +23,14 @@ class ContentModel extends ChangeNotifier {
   List<String> imageUrls = [];
 
   Map<int, File> imageFiles = {};
+
+  bool isUpdatedPost = false;
+
+  Future updatePost() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('posts').doc(post.id).get();
+    post = Post(snapshot);
+    isUpdatedPost = true;
+    notifyListeners();
+  }
 }

@@ -235,7 +235,16 @@ class ContentPage extends StatelessWidget {
         height: 80,
         width: 80,
         color: Colors.black12,
-        child: Image.network(imageUrl),
+        child: Image.network(
+          imageUrl,
+          errorBuilder:
+              (BuildContext context, Object exception, StackTrace? stackTrace) {
+            return Icon(
+              Icons.image_not_supported_outlined,
+              size: 80,
+            );
+          },
+        ),
       ),
     );
   }

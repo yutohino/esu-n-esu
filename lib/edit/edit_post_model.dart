@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:collection';
 import 'dart:io';
 
@@ -19,7 +21,7 @@ class EditPostModel extends ChangeNotifier {
       contentController.text = post!.content;
       int index = 0;
       for (var imageUrl in post!.imageUrls) {
-        imageUrls[index] = imageUrl;
+        uploadedImageUrls[index] = imageUrl;
         index++;
       }
     }
@@ -32,7 +34,7 @@ class EditPostModel extends ChangeNotifier {
 
   String title = '';
   String content = '';
-  Map<int, String> imageUrls = {};
+  Map<int, String> uploadedImageUrls = {};
   bool isChangeImage = false;
 
   final imagePicker = ImagePicker();
@@ -65,7 +67,10 @@ class EditPostModel extends ChangeNotifier {
       imageFiles.addAll({index: File(pickedFile.path)});
       notifyListeners();
       if (post != null) {
-        imageUrls.remove(index);
+        String deleteImageUrl = uploadedImageUrls.remove(index) ?? '';
+        if (deleteImageUrl.isNotEmpty) {
+          deleteImageUrls.add(deleteImageUrl);
+        }
         isChangeImage = true;
       }
     }
@@ -86,7 +91,8 @@ class EditPostModel extends ChangeNotifier {
     if (imageFiles.containsKey(index)) {
       imageFiles.remove(index);
     } else {
-      imageUrls.remove(index);
+      String deleteImageUrl = uploadedImageUrls.remove(index) ?? '';
+      deleteImageUrls.add(deleteImageUrl);
       isChangeImage = true;
     }
     notifyListeners();
@@ -136,9 +142,11 @@ class EditPostModel extends ChangeNotifier {
     } else {
       // 変更 or 削除された画像をStorageから削除
       for (String deleteImageUrl in deleteImageUrls) {
-        final storageRef = FirebaseStorage.instance.ref();
-        // TODO: サーバーのファイルパスを指定する必要あり
-        await storageRef.child(deleteImageUrl).delete();
+        try {
+          await FirebaseStorage.instance.refFromURL(deleteImageUrl).delete();
+        } on FirebaseException catch (e) {
+          print("Failed with error '${e.code}': ${e.message}");
+        }
       }
 
       // 追加した画像をアップロード
@@ -153,10 +161,10 @@ class EditPostModel extends ChangeNotifier {
         imageUrls[index] = imgUrl;
       }
       // 既存の画像とアップロードした画像のMapを結合 & インデックスの順番に並び替える
-      this.imageUrls.addAll(imageUrls);
-      SplayTreeMap.from(this.imageUrls, (int a, int b) => a.compareTo(b));
+      uploadedImageUrls.addAll(imageUrls);
+      SplayTreeMap.from(uploadedImageUrls, (int a, int b) => a.compareTo(b));
       // MapからListに変換
-      for (var imageUrl in this.imageUrls.values) {
+      for (var imageUrl in uploadedImageUrls.values) {
         imageUrlsList.add(imageUrl);
       }
     }

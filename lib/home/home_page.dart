@@ -208,9 +208,11 @@ class HomePage extends StatelessWidget {
                       children: [
                         _showUserImage(
                             model,
-                            model
-                                .getPostedUserInfo(posts[index].uid)!
-                                .userImageUrl,
+                            model.getPostedUserInfo(posts[index].uid) != null
+                                ? model
+                                    .getPostedUserInfo(posts[index].uid)!
+                                    .userImageUrl
+                                : '',
                             28),
                         SizedBox(width: 4),
                         Text(

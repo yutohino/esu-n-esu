@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, iterable_contains_unrelated_type
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit/edit_post_model.dart';
@@ -36,7 +37,8 @@ class EditPostPage extends StatelessWidget {
                             uploadedMessage = 'ポストを更新しました';
                           }
                           Navigator.pop(context, uploadedMessage);
-                        } catch (e) {
+                        } on FirebaseException catch (e) {
+                          print("Failed with error '${e.code}': ${e.message}");
                           final snackBar = SnackBar(
                             content: Text(e.toString()),
                             backgroundColor: Colors.red,
@@ -106,7 +108,7 @@ class EditPostPage extends StatelessWidget {
                               // 端末から取得した画像
                               _pickedImageBox(context, model, index),
                             } else if (model.post != null &&
-                                index < model.imageUrls.length) ...{
+                                model.uploadedImageUrls.containsKey(index)) ...{
                               // アップロード済みの画像
                               _uploadedImageBox(context, model, index)
                             } else ...{
@@ -188,7 +190,16 @@ class EditPostPage extends StatelessWidget {
           height: 80,
           width: 80,
           color: Colors.black12,
-          child: Image.network(model.imageUrls[index]!)),
+          child: Image.network(
+            model.uploadedImageUrls[index] ?? '',
+            errorBuilder: (BuildContext context, Object exception,
+                StackTrace? stackTrace) {
+              return Icon(
+                Icons.image_not_supported_outlined,
+                size: 80,
+              );
+            },
+          )),
     );
   }
 

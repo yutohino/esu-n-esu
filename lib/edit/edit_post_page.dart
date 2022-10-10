@@ -198,6 +198,11 @@ class EditPostPage extends StatelessWidget {
         height: 80,
         width: 80,
         color: Colors.black12,
+        child: Icon(
+          Icons.image_outlined,
+          size: 80,
+          color: Colors.black54,
+        ),
       ),
     );
   }

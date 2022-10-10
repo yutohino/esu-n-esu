@@ -23,6 +23,8 @@ class HomeModel extends ChangeNotifier {
 
   /// ポストを10件取得(初回)
   Future firstFetchPosts() async {
+    _reset();
+
     if (FirebaseAuth.instance.currentUser != null) {
       await _checkMyUserInfo(FirebaseAuth.instance.currentUser!.uid);
     }
@@ -42,8 +44,6 @@ class HomeModel extends ChangeNotifier {
     // 取得したポスト数が10件未満なら、postsコレクションのドキュメント
     isFetchLastItem = snapshots.docs.length < 10;
 
-    posts = []; // 表示中のポストを初期化
-    postedUsers = []; // ユーザー情報を初期化
     await Future.wait(snapshots.docs.map((document) async {
       final post = Post(document);
       posts.add(post);
@@ -117,13 +117,9 @@ class HomeModel extends ChangeNotifier {
     myUserInfo = user;
   }
 
-  /// ログインしているユーザー情報を取得
-  AppUser? getMyUserInfo() {
-    return myUserInfo;
-  }
-
   /// 取得したポストの情報とフラグをリセット
-  void reset() {
+  void _reset() {
+    myUserInfo = null;
     posts = [];
     _fetchedLastSnapshot = null;
     isFetchLastItem = false;

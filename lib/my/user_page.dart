@@ -1,98 +1,116 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously, must_be_immutable
 
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_page.dart';
+import 'package:esu_n_esu/domain/AppUser.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit/edit_post_page.dart';
-import 'package:esu_n_esu/home/home_model.dart';
-import 'package:esu_n_esu/login/login_page.dart';
-import 'package:esu_n_esu/my/user_page.dart';
+import 'package:esu_n_esu/my/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+enum Menu { followList, bookMarkList, logout }
+
+class UserPage extends StatelessWidget {
+  UserPage(this.user);
+
+  AppUser user;
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<HomeModel>(
-      create: (_) => HomeModel()..firstFetchPosts(),
+    return ChangeNotifierProvider<UserModel>(
+      create: (_) => UserModel(user)..firstFetchPosts(),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Palette.mainColor,
-          title: Text('ホーム'),
+          title: Text('マイページ'),
           actions: [
-            Consumer<HomeModel>(builder: (context, model, child) {
-              // ログインしているユーザー情報が取得できるまで、ログインボタンを表示しない
-              if (model.myUserInfo != null) {
-                if (model.myUserInfo == null) {
-                  return SizedBox();
-                }
-              }
-              return IconButton(
-                onPressed: () async {
-                  if (model.myUserInfo != null) {
-                    // マイページに遷移
-                    await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UserPage(model.myUserInfo!),
-                        ));
-                    await model.firstFetchPosts();
-                  } else {
-                    // ログイン画面に遷移
-                    String? loginOrRegisterMessage = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LoginPage(),
-                        ));
-                    if (loginOrRegisterMessage != null) {
-                      _showSnackBar(context, loginOrRegisterMessage, true);
-                      await model.firstFetchPosts();
-                    }
+            Consumer<UserModel>(builder: (context, model, child) {
+              return PopupMenuButton(
+                onSelected: (Menu selectedItem) async {
+                  if (selectedItem == Menu.followList) {
+                    // TODO: フォローリスト画面に遷移する
+                  } else if (selectedItem == Menu.bookMarkList) {
+                    // TODO: ブックマーク画面に遷移する
+                  } else if (selectedItem == Menu.logout) {
+                    model.startLoading();
+                    await model.logout();
+                    model.endLoading();
+                    Navigator.pop(context, 'ログアウトしました');
                   }
                 },
-                icon: model.myUserInfo != null
-                    ? _showUserImage(model, model.myUserInfo!.userImageUrl, 36)
-                    : Icon(Icons.account_circle_outlined),
-                iconSize: 36,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<Menu>>[
+                    PopupMenuItem<Menu>(
+                      value: Menu.followList,
+                      child: Text('フォローリスト'),
+                    ),
+                    PopupMenuItem<Menu>(
+                      value: Menu.bookMarkList,
+                      child: Text('ブックマークリスト'),
+                    ),
+                    PopupMenuItem<Menu>(
+                      value: Menu.logout,
+                      child: Text('ログアウト'),
+                    ),
+                  ];
+                },
+                icon: Icon(Icons.more_vert),
               );
             }),
           ],
         ),
-        body: Center(
-          child: Consumer<HomeModel>(builder: (context, model, child) {
-            final posts = model.posts;
-            if (posts.isEmpty) {
-              if (!model.isFetchLastItem) {
-                // ポストを取得するまでサークルを表示
-                return CircularProgressIndicator(
-                  color: Palette.mainColor,
+        body: Stack(
+          children: [
+            Center(
+              child: Consumer<UserModel>(builder: (context, model, child) {
+                final posts = model.posts;
+                if (posts.isEmpty) {
+                  if (!model.isFetchLastItem) {
+                    // ポストを取得するまでサークルを表示
+                    return CircularProgressIndicator(
+                      color: Palette.mainColor,
+                    );
+                  }
+                }
+
+                // ポストを10件ずつリスト表示する
+                final controller = ScrollController();
+                controller.addListener(() async {
+                  if (model.isFetchLastItem) {
+                    return;
+                  }
+                  if (controller.position.maxScrollExtent ==
+                          controller.offset &&
+                      !model.isLoading) {
+                    model.startLoading();
+                    model.fetchPosts();
+                    model.endLoading();
+                  }
+                });
+
+                return _buildListView(controller, model, posts);
+              }),
+            ),
+            Consumer<UserModel>(builder: (context, model, child) {
+              if (model.isLoading) {
+                return Container(
+                  color: Colors.black54,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Palette.mainColor,
+                    ),
+                  ),
                 );
+              } else {
+                return Container();
               }
-            }
-
-            // ポストを10件ずつリスト表示する
-            final controller = ScrollController();
-            controller.addListener(() async {
-              if (model.isFetchLastItem) {
-                return;
-              }
-              if (controller.position.maxScrollExtent == controller.offset &&
-                  !model.isLoading) {
-                model.startLoading();
-                model.fetchPosts();
-                model.endLoading();
-              }
-            });
-
-            return _buildListView(controller, model, posts);
-          }),
+            }),
+          ],
         ),
         floatingActionButton:
-            Consumer<HomeModel>(builder: (context, model, child) {
-          if (model.myUserInfo == null) {
-            return Container();
-          }
+            Consumer<UserModel>(builder: (context, model, child) {
           return FloatingActionButton(
             backgroundColor: Palette.mainColor,
             onPressed: () async {
@@ -118,7 +136,7 @@ class HomePage extends StatelessWidget {
 
   /// タイムラインのListViewを作成
   Widget _buildListView(
-      ScrollController controller, HomeModel model, List<Post> posts) {
+      ScrollController controller, UserModel model, List<Post> posts) {
     return RefreshIndicator(
       // ポストの情報を初期化 & 最初の10件を取得
       onRefresh: () async {
@@ -136,8 +154,8 @@ class HomePage extends StatelessWidget {
                 bool isUpdatedOrDeletedPost = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ContentPage(posts[index],
-                          model.getPostedUserInfo(posts[index].uid)!),
+                      builder: (context) =>
+                          ContentPage(posts[index], model.user),
                     ));
                 if (isUpdatedOrDeletedPost) {
                   await model.firstFetchPosts();
@@ -198,21 +216,10 @@ class HomePage extends StatelessWidget {
                     SizedBox(height: 8),
                     Row(
                       children: [
-                        _showUserImage(
-                            model,
-                            model.getPostedUserInfo(posts[index].uid) != null
-                                ? model
-                                    .getPostedUserInfo(posts[index].uid)!
-                                    .userImageUrl
-                                : '',
-                            28),
+                        _showUserImage(model, model.user.userImageUrl, 28),
                         SizedBox(width: 4),
                         Text(
-                          model.getPostedUserInfo(posts[index].uid) != null
-                              ? model
-                                  .getPostedUserInfo(posts[index].uid)!
-                                  .username
-                              : '',
+                          model.user.username,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -276,7 +283,7 @@ class HomePage extends StatelessWidget {
   }
 
   /// ユーザーアイコンを表示
-  Widget _showUserImage(HomeModel model, String userImageUrl, double size) {
+  Widget _showUserImage(UserModel model, String userImageUrl, double size) {
     if (userImageUrl.isEmpty) {
       return Icon(
         Icons.account_circle,

@@ -1,18 +1,18 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/AppUser.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class MyModel extends ChangeNotifier {
+class UserModel extends ChangeNotifier {
+  UserModel(this.user);
+
+  AppUser user;
+
   List<Post> posts = [];
   bool isLoading = false;
   DocumentSnapshot? _fetchedLastSnapshot; // 現在取得している最後のドキュメントを保持
   bool isFetchLastItem = false;
-
-  List<AppUser> users = [];
 
   void startLoading() {
     isLoading = true;
@@ -26,9 +26,12 @@ class MyModel extends ChangeNotifier {
 
   /// ポストを10件取得(初回)
   Future firstFetchPosts() async {
+    _reset();
+
     // ポストを10件取得
     final QuerySnapshot snapshots = await FirebaseFirestore.instance
         .collection('posts')
+        .where('uid', isEqualTo: user.uid)
         .orderBy('editedAt', descending: true)
         .limit(10)
         .get();
@@ -39,7 +42,6 @@ class MyModel extends ChangeNotifier {
     // 取得したポスト数が10件未満なら、postsコレクションのドキュメント
     isFetchLastItem = snapshots.docs.length < 10;
 
-    posts = []; // 表示中のポストを初期化
     snapshots.docs.map((document) {
       final post = Post(document);
       posts.add(post);
@@ -53,6 +55,7 @@ class MyModel extends ChangeNotifier {
     // 最後に取得したドキュメントを起点に、ポストを10件取得
     final QuerySnapshot snapshots = await FirebaseFirestore.instance
         .collection('posts')
+        .where('uid', isEqualTo: user.uid)
         .orderBy('createdAt', descending: true)
         .startAfterDocument(_fetchedLastSnapshot!)
         .limit(10)
@@ -76,40 +79,14 @@ class MyModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 記事のユーザー情報を取得
-  AppUser? fetchPostedUserInfo(String uid) {
-    for (AppUser user in users) {
-      return user;
-    }
-    return null;
-  }
-
-  /// uidを基にユーザー情報を取得してusersに追加する
-  Future _addUserInfo(String uid) async {
-    // usersにユーザー情報がある場合
-    for (AppUser user in users) {
-      if (uid == user.uid) {
-        return;
-      }
-    }
-
-    // usersに無い場合はusersコレクションから取得する
-    final snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final user = AppUser(snapshot);
-    users.add(user);
-  }
-
   /// 取得したポストの情報とフラグをリセット
-  void reset() {
+  void _reset() {
     posts = [];
     _fetchedLastSnapshot = null;
     isFetchLastItem = false;
-    users = [];
   }
 
   Future logout() async {
     await FirebaseAuth.instance.signOut();
-    sleep(const Duration(seconds: 2));
   }
 }

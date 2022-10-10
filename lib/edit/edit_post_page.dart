@@ -34,6 +34,7 @@ class EditPostPage extends StatelessWidget {
                           }
                           model.startUploading();
                           await model.deletePost();
+                          _showSnackBar(context, 'ポストを削除しました', true);
                           Navigator.pop(context, '削除');
                         } on FirebaseException catch (e) {
                           print("Failed with error '${e.code}': ${e.message}");
@@ -132,7 +133,7 @@ class EditPostPage extends StatelessWidget {
                                     uploadedMessage = 'ポストを更新しました';
                                   }
                                   _showSnackBar(context, uploadedMessage, true);
-                                  Navigator.pop(context, '更新');
+                                  Navigator.pop(context);
                                 } on FirebaseException catch (e) {
                                   print(
                                       "Failed with error '${e.code}': ${e.message}");

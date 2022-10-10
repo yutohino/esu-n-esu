@@ -38,7 +38,7 @@ class HomePage extends StatelessWidget {
                           builder: (context) => MyPage(),
                         ));
                     if (logoutMessage != null) {
-                      _showSuccessSnackBar(context, logoutMessage);
+                      _showSnackBar(context, logoutMessage, true);
                       model.firstFetchPosts();
                     }
                   } else {
@@ -48,7 +48,7 @@ class HomePage extends StatelessWidget {
                           builder: (context) => LoginPage(),
                         ));
                     if (loginOrRegisterMessage != null) {
-                      _showSuccessSnackBar(context, loginOrRegisterMessage);
+                      _showSnackBar(context, loginOrRegisterMessage, true);
                       model.firstFetchPosts();
                     }
                   }
@@ -107,7 +107,7 @@ class HomePage extends StatelessWidget {
                   ));
 
               if (uploadMessage != null) {
-                _showSuccessSnackBar(context, uploadMessage);
+                _showSnackBar(context, uploadMessage, true);
               }
               model.firstFetchPosts();
             },
@@ -302,11 +302,11 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// 成功スナックバーを表示
-  void _showSuccessSnackBar(BuildContext context, String message) {
+  /// スナックバーを表示
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
     final snackBar = SnackBar(
       content: Text(message),
-      backgroundColor: Colors.green,
+      backgroundColor: isSuccess ? Colors.green : Colors.red,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }

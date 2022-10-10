@@ -55,12 +55,7 @@ class LoginPage extends StatelessWidget {
                             await model.login();
                             Navigator.pop(context, 'ログインしました');
                           } catch (e) {
-                            final snackBar = SnackBar(
-                              content: Text(e.toString()),
-                              backgroundColor: Colors.red,
-                            );
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
+                            _showSnackBar(context, e.toString(), false);
                           } finally {
                             model.endLoading();
                           }
@@ -104,5 +99,14 @@ class LoginPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// スナックバーを表示
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: isSuccess ? Colors.green : Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

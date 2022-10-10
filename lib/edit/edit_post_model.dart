@@ -179,6 +179,16 @@ class EditPostModel extends ChangeNotifier {
     });
   }
 
-  // TODO: 編集処理
-  // TODO: アップロードした画像を削除 or 置き換えた場合、画像をStorageからも削除するようにする
+  /// ポストを削除する
+  Future deletePost() async {
+    await FirebaseFirestore.instance.collection('posts').doc(post!.id).delete();
+    // アップロードした画像をStorageから削除する
+    for (String imageUrl in post!.imageUrls) {
+      try {
+        await FirebaseStorage.instance.refFromURL(imageUrl).delete();
+      } on FirebaseException catch (e) {
+        print("Failed with error '${e.code}': ${e.message}");
+      }
+    }
+  }
 }

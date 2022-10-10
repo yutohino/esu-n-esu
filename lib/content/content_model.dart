@@ -25,6 +25,7 @@ class ContentModel extends ChangeNotifier {
   Map<int, File> imageFiles = {};
 
   bool isUpdatedPost = false;
+  bool isDeletedPost = false;
 
   Future updatePost() async {
     final snapshot =
@@ -32,5 +33,9 @@ class ContentModel extends ChangeNotifier {
     post = Post(snapshot);
     isUpdatedPost = true;
     notifyListeners();
+  }
+
+  void deletePost() {
+    isDeletedPost = true;
   }
 }

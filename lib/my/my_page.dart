@@ -101,7 +101,7 @@ class MyPage extends StatelessWidget {
                   ));
 
               if (uploadMessage != null) {
-                _showSuccessSnackBar(context, uploadMessage);
+                _showSnackBar(context, uploadMessage, true);
               }
               model.firstFetchPosts();
             },
@@ -261,11 +261,11 @@ class MyPage extends StatelessWidget {
     );
   }
 
-  /// 成功スナックバーを表示
-  void _showSuccessSnackBar(BuildContext context, String message) {
+  /// スナックバーを表示
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
     final snackBar = SnackBar(
       content: Text(message),
-      backgroundColor: Colors.green,
+      backgroundColor: isSuccess ? Colors.green : Colors.red,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }

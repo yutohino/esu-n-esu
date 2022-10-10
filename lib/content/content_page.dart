@@ -39,14 +39,17 @@ class ContentPage extends StatelessWidget {
                     Consumer<ContentModel>(builder: (context, model, child) {
                       return PopupMenuButton(
                         onSelected: (Menu selectedItem) async {
-                          String? editedMessage = await Navigator.push(
+                          String? status = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => EditPostPage(model.post),
                               ));
-                          if (editedMessage != null) {
-                            _showSuccessSnackBar(context, editedMessage);
+                          if (status == '更新') {
                             await model.updatePost();
+                          }
+                          if (status == '削除') {
+                            model.deletePost();
+                            Navigator.pop(context, model.isDeletedPost);
                           }
                         },
                         itemBuilder: (BuildContext context) =>
@@ -248,14 +251,5 @@ class ContentPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// 成功スナックバーを表示
-  void _showSuccessSnackBar(BuildContext context, String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      backgroundColor: Colors.green,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

@@ -22,41 +22,32 @@ class EditPostPage extends StatelessWidget {
           title: Text(post == null ? '新規投稿作成' : '編集'),
           actions: [
             Consumer<EditPostModel>(builder: (context, model, child) {
-              final isActive = model.isUpdated();
-              return TextButton(
-                onPressed: isActive
-                    ? () async {
+              return post != null
+                  ? TextButton(
+                      onPressed: () async {
                         try {
-                          model.startUploading();
-                          String uploadedMessage;
-                          if (model.post == null) {
-                            await model.uploadNewPost();
-                            uploadedMessage = 'ポストを新規投稿しました';
-                          } else {
-                            await model.uploadExistingPost();
-                            uploadedMessage = 'ポストを更新しました';
+                          final deleteMessage =
+                              await _showDeletePostDialog(context, model);
+                          if (deleteMessage == null) {
+                            // 削除しない
+                            return;
                           }
-                          Navigator.pop(context, uploadedMessage);
+                          model.startUploading();
+                          await model.deletePost();
+                          Navigator.pop(context, '削除');
                         } on FirebaseException catch (e) {
                           print("Failed with error '${e.code}': ${e.message}");
-                          final snackBar = SnackBar(
-                            content: Text(e.toString()),
-                            backgroundColor: Colors.red,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          _showSnackBar(context, e.message ?? '', false);
                         } finally {
                           model.endUploading();
                         }
-                      }
-                    : null,
-                child: Text(
-                  '投稿',
-                  style: TextStyle(
-                      color: isActive
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.5)),
-                ),
-              );
+                      },
+                      child: Text(
+                        '削除',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  : SizedBox();
             }),
           ],
         ),
@@ -68,6 +59,7 @@ class EditPostPage extends StatelessWidget {
               child: SingleChildScrollView(
                 child:
                     Consumer<EditPostModel>(builder: (context, model, child) {
+                  final isActive = model.isUpdated();
                   return Column(
                     children: [
                       TextField(
@@ -122,6 +114,50 @@ class EditPostPage extends StatelessWidget {
                             },
                           },
                         ],
+                      ),
+                      SizedBox(
+                        height: 32,
+                      ),
+                      TextButton(
+                        onPressed: isActive
+                            ? () async {
+                                try {
+                                  model.startUploading();
+                                  String uploadedMessage;
+                                  if (model.post == null) {
+                                    await model.uploadNewPost();
+                                    uploadedMessage = 'ポストを新規投稿しました';
+                                  } else {
+                                    await model.uploadExistingPost();
+                                    uploadedMessage = 'ポストを更新しました';
+                                  }
+                                  _showSnackBar(context, uploadedMessage, true);
+                                  Navigator.pop(context, '更新');
+                                } on FirebaseException catch (e) {
+                                  print(
+                                      "Failed with error '${e.code}': ${e.message}");
+                                  _showSnackBar(
+                                      context, e.message ?? '', false);
+                                } finally {
+                                  model.endUploading();
+                                }
+                              }
+                            : null,
+                        style: TextButton.styleFrom(
+                          backgroundColor: isActive
+                              ? Palette.mainColor
+                              : Palette.mainColor.withOpacity(0.6),
+                          shape: StadiumBorder(),
+                          padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                        ),
+                        child: Text(
+                          '投稿する',
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: isActive
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.6)),
+                        ),
                       ),
                       SizedBox(
                         height: 32,
@@ -236,5 +272,47 @@ class EditPostPage extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// ポストの削除確認ダイアログ
+  Future<String?> _showDeletePostDialog(
+      BuildContext context, EditPostModel model) {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text('このポストを削除しますか?'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: Text('いいえ'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: Text('削除する'),
+              onPressed: () {
+                Navigator.pop(context, 'ポストを削除しました');
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// スナックバーを表示
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: isSuccess ? Colors.green : Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

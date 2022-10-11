@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_key_in_widget_constructors, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_key_in_widget_constructors, use_build_context_synchronously, prefer_const_literals_to_create_immutables
 
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/register/register_model.dart';
@@ -56,32 +56,31 @@ class RegisterPage extends StatelessWidget {
                         },
                       ),
                       SizedBox(height: 16),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Palette.mainColor,
-                        ),
+                      TextButton(
                         onPressed: () async {
                           model.startLoading();
                           // アカウント登録
                           try {
                             await model.signUp();
-                            // ログイン画面の遷移履歴を削除し、home画面に遷移
                             Navigator.pop(context, '新規登録しました');
-                            // Navigator.pushNamedAndRemoveUntil(
-                            // context, '/home', (_) => false);
-                            // final snackBar = SnackBar(
-                            //   content: Text('新規登録しました'),
-                            //   backgroundColor: Colors.red,
-                            // );
-                            // ScaffoldMessenger.of(context)
-                            //     .showSnackBar(snackBar);
                           } catch (e) {
                             _showSnackBar(context, e.toString(), false);
                           } finally {
                             model.endLoading();
                           }
                         },
-                        child: Text('登録する'),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Palette.mainColor,
+                          foregroundColor: Colors.white,
+                          shape: StadiumBorder(),
+                          padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('登録する'),
+                          ],
+                        ),
                       ),
                     ],
                   ),

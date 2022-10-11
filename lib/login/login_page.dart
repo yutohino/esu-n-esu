@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_key_in_widget_constructors, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_key_in_widget_constructors, use_build_context_synchronously, prefer_const_literals_to_create_immutables
 
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/login/login_model.dart';
@@ -45,10 +45,7 @@ class LoginPage extends StatelessWidget {
                         },
                       ),
                       SizedBox(height: 16),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Palette.mainColor,
-                        ),
+                      TextButton(
                         onPressed: () async {
                           try {
                             model.startLoading();
@@ -60,7 +57,18 @@ class LoginPage extends StatelessWidget {
                             model.endLoading();
                           }
                         },
-                        child: Text('ログイン'),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Palette.mainColor,
+                          foregroundColor: Colors.white,
+                          shape: StadiumBorder(),
+                          padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('ログイン'),
+                          ],
+                        ),
                       ),
                       TextButton(
                         onPressed: () async {

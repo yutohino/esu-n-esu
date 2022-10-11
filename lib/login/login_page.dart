@@ -63,12 +63,7 @@ class LoginPage extends StatelessWidget {
                           shape: StadiumBorder(),
                           padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('ログイン'),
-                          ],
-                        ),
+                        child: Text('ログイン'),
                       ),
                       TextButton(
                         onPressed: () async {

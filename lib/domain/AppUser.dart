@@ -6,11 +6,13 @@ class AppUser {
     uid = data['uid'];
     email = data['email'];
     username = data['username'];
-    userImageUrl = data['userImageUrl'];
+    userImageUrl = data['userImageUrl'] ?? '';
+    userDetail = data['userDetail'] ?? '';
   }
 
   String uid = '';
   String email = '';
   String username = '';
   String userImageUrl = '';
+  String userDetail = '';
 }

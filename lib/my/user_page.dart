@@ -90,7 +90,88 @@ class UserPage extends StatelessWidget {
                   }
                 });
 
-                return _buildListView(controller, model, posts);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          _showUserImage(model, model.user.userImageUrl, 80),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextButton(
+                                  onPressed: () async {
+                                    // TODO: マイページ編集画面に遷移する
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Palette.mainColor,
+                                    foregroundColor: Colors.white,
+                                    shape: StadiumBorder(),
+                                    padding:
+                                        EdgeInsets.fromLTRB(15, 10, 15, 10),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.edit_outlined),
+                                      SizedBox(
+                                        width: 4,
+                                      ),
+                                      Text('編集'),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        model.user.username,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (model.user.userDetail.isNotEmpty) ...{
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text(
+                          model.user.userDetail,
+                          maxLines: 7,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            height: 1.2,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
+                    },
+                    Container(
+                      height: 0.25,
+                      width: double.infinity,
+                      color: Colors.grey,
+                    ),
+                    _buildListView(controller, model, posts),
+                  ],
+                );
               }),
             ),
             Consumer<UserModel>(builder: (context, model, child) {
@@ -144,6 +225,7 @@ class UserPage extends StatelessWidget {
       },
       child: ListView.separated(
         controller: controller,
+        shrinkWrap: true,
         physics: AlwaysScrollableScrollPhysics(),
         itemCount: posts.length + 1,
         itemBuilder: (BuildContext context, int index) {
@@ -218,13 +300,15 @@ class UserPage extends StatelessWidget {
                       children: [
                         _showUserImage(model, model.user.userImageUrl, 28),
                         SizedBox(width: 4),
-                        Text(
-                          model.user.username,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black54,
+                        Expanded(
+                          child: Text(
+                            model.user.username,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
                           ),
                         ),
                       ],
@@ -282,7 +366,7 @@ class UserPage extends StatelessWidget {
     );
   }
 
-  /// ユーザーアイコンを表示
+  /// ユーザー画像を表示
   Widget _showUserImage(UserModel model, String userImageUrl, double size) {
     if (userImageUrl.isEmpty) {
       return Icon(
@@ -290,21 +374,17 @@ class UserPage extends StatelessWidget {
         size: size,
       );
     }
-    return SizedBox(
+    return Container(
       width: size,
       height: size,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(50),
-        child: Image.network(
-          userImageUrl,
-          errorBuilder:
-              (BuildContext context, Object exception, StackTrace? stackTrace) {
-            return Icon(
-              Icons.account_circle,
-              size: size,
-            );
-          },
-        ),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(
+            image: NetworkImage(userImageUrl),
+            onError: (error, stackTrace) {
+              print(stackTrace);
+            },
+            fit: BoxFit.cover),
       ),
     );
   }

@@ -36,8 +36,9 @@ class UserModel extends ChangeNotifier {
         .limit(10)
         .get();
 
-    // 次のページ読み込み時の開始地点を設定
-    _fetchedLastSnapshot = snapshots.docs.last;
+    if (snapshots.docs.isNotEmpty) {
+      _fetchedLastSnapshot = snapshots.docs.last;
+    }
 
     // 取得したポスト数が10件未満なら、postsコレクションのドキュメント
     isFetchLastItem = snapshots.docs.length < 10;

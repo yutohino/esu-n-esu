@@ -58,7 +58,6 @@ class RegisterModel extends ChangeNotifier {
           'uid': uid,
           'username': username,
           'email': email,
-          'userImageUrl': '',
         });
       }
     }

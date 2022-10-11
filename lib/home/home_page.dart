@@ -275,7 +275,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// ユーザーアイコンを表示
+  /// ユーザー画像を表示
   Widget _showUserImage(HomeModel model, String userImageUrl, double size) {
     if (userImageUrl.isEmpty) {
       return Icon(
@@ -283,21 +283,17 @@ class HomePage extends StatelessWidget {
         size: size,
       );
     }
-    return SizedBox(
+    return Container(
       width: size,
       height: size,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(50),
-        child: Image.network(
-          userImageUrl,
-          errorBuilder:
-              (BuildContext context, Object exception, StackTrace? stackTrace) {
-            return Icon(
-              Icons.account_circle,
-              size: size,
-            );
-          },
-        ),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(
+            image: NetworkImage(userImageUrl),
+            onError: (error, stackTrace) {
+              print(stackTrace);
+            },
+            fit: BoxFit.cover),
       ),
     );
   }

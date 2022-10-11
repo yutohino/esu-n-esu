@@ -75,12 +75,7 @@ class RegisterPage extends StatelessWidget {
                           shape: StadiumBorder(),
                           padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('登録する'),
-                          ],
-                        ),
+                        child: Text('登録する'),
                       ),
                     ],
                   ),

@@ -3,7 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/domain/post.dart';
-import 'package:esu_n_esu/edit/edit_post_model.dart';
+import 'package:esu_n_esu/edit_post/edit_post_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -125,15 +125,18 @@ class EditPostPage extends StatelessWidget {
                                 try {
                                   model.startUploading();
                                   String uploadedMessage;
+                                  String status;
                                   if (model.post == null) {
                                     await model.uploadNewPost();
                                     uploadedMessage = 'ポストを新規投稿しました';
+                                    status = '新規投稿';
                                   } else {
                                     await model.uploadExistingPost();
                                     uploadedMessage = 'ポストを更新しました';
+                                    status = '更新';
                                   }
                                   _showSnackBar(context, uploadedMessage, true);
-                                  Navigator.pop(context);
+                                  Navigator.pop(context, status);
                                 } on FirebaseException catch (e) {
                                   print(
                                       "Failed with error '${e.code}': ${e.message}");

@@ -1,0 +1,244 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously, must_be_immutable
+
+import 'package:esu_n_esu/colors/Palette.dart';
+import 'package:esu_n_esu/domain/AppUser.dart';
+import 'package:esu_n_esu/edit_profile/edit_profile_model.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+enum Menu { deleteAccount }
+
+class EditProfilePage extends StatelessWidget {
+  EditProfilePage(this.user);
+
+  AppUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<EditProfileModel>(
+      create: (_) => EditProfileModel(user),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Palette.mainColor,
+          title: Text('プロフィール編集'),
+          actions: [
+            Consumer<EditProfileModel>(builder: (context, model, child) {
+              return PopupMenuButton(
+                onSelected: (Menu selectedItem) async {
+                  if (selectedItem == Menu.deleteAccount) {
+                    model.startUploading();
+                    // TODO: アカウント削除確認ダイアログの表示
+                    // TODO: アカウント削除処理(画面遷移履歴を削除して、ホーム画面に飛ぶ)
+                    model.endUploading();
+                    Navigator.pop(context, 'アカウントを削除しました');
+                  }
+                },
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<Menu>>[
+                    PopupMenuItem<Menu>(
+                      value: Menu.deleteAccount,
+                      child: Text('アカウント削除'),
+                    ),
+                  ];
+                },
+                icon: Icon(Icons.more_vert),
+              );
+            }),
+          ],
+        ),
+        body: Stack(
+          children: [
+            Center(
+              child:
+                  Consumer<EditProfileModel>(builder: (context, model, child) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          InkWell(
+                            onTap: () async {
+                              await model.pickImage();
+                            },
+                            child: _showUserImage(model, 80),
+                          ),
+                          SizedBox(
+                            width: 8,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: model.usernameController,
+                              maxLength: 24,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'ユーザー名',
+                                contentPadding: EdgeInsets.all(8),
+                              ),
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              onChanged: (text) {
+                                model.setUsername(text);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        await _showEditUserDetailDialog(context, model);
+                        model.setUserDetail(model.userDetailController.text);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(8),
+                        child: Text(
+                          model.userDetail.isNotEmpty
+                              ? model.userDetail
+                              : '"自己紹介文"',
+                          maxLines: 16,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            height: 1.2,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        try {
+                          model.startUploading();
+                          await model.saveEditedProfile();
+                          Navigator.pop(context, 'プロフィールを更新しました');
+                        } catch (e) {
+                          print(e.toString());
+                          _showSnackBar(context, e.toString() ?? '', false);
+                        } finally {
+                          model.endUploading();
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: Palette.mainColor,
+                        shape: StadiumBorder(),
+                        padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+                      ),
+                      child: Text(
+                        '保存する',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ),
+            Consumer<EditProfileModel>(builder: (context, model, child) {
+              if (model.isLoading) {
+                return Container(
+                  color: Colors.black54,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Palette.mainColor,
+                    ),
+                  ),
+                );
+              } else {
+                return Container();
+              }
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// ユーザー画像を表示
+  Widget _showUserImage(EditProfileModel model, double size) {
+    if (model.editedImageFile != null) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+              image: FileImage(model.editedImageFile!),
+              onError: (error, stackTrace) {
+                print(stackTrace);
+              },
+              fit: BoxFit.cover),
+        ),
+      );
+    }
+    if (model.user.userImageUrl.isEmpty) {
+      return Icon(
+        Icons.account_circle,
+        size: size,
+      );
+    }
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(
+            image: NetworkImage(model.user.userImageUrl),
+            onError: (error, stackTrace) {
+              print(stackTrace);
+            },
+            fit: BoxFit.cover),
+      ),
+    );
+  }
+
+  /// 自己紹介編集ダイアログの表示
+  Future _showEditUserDetailDialog(
+          BuildContext context, EditProfileModel model) =>
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('自己紹介文'),
+          content: TextField(
+            controller: model.userDetailController,
+            autofocus: true,
+            maxLength: 120,
+            maxLines: 16,
+            decoration: InputDecoration(
+              hintText: '自己紹介文',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(
+                '保存する',
+                style: TextStyle(
+                  color: Palette.mainColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  /// スナックバーを表示
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: isSuccess ? Colors.green : Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+}

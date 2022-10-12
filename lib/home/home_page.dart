@@ -3,7 +3,7 @@
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_page.dart';
 import 'package:esu_n_esu/domain/post.dart';
-import 'package:esu_n_esu/edit/edit_post_page.dart';
+import 'package:esu_n_esu/edit_post/edit_post_page.dart';
 import 'package:esu_n_esu/home/home_model.dart';
 import 'package:esu_n_esu/login/login_page.dart';
 import 'package:esu_n_esu/my/user_page.dart';
@@ -52,7 +52,7 @@ class HomePage extends StatelessWidget {
                   }
                 },
                 icon: model.myUserInfo != null
-                    ? _showUserImage(model, model.myUserInfo!.userImageUrl, 36)
+                    ? _showUserImage(model.myUserInfo!.userImageUrl, 36)
                     : Icon(Icons.account_circle_outlined),
                 iconSize: 36,
               );
@@ -96,17 +96,15 @@ class HomePage extends StatelessWidget {
           return FloatingActionButton(
             backgroundColor: Palette.mainColor,
             onPressed: () async {
-              String? uploadMessage = await Navigator.push(
+              String? status = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditPostPage(null),
                     fullscreenDialog: true,
                   ));
-
-              if (uploadMessage != null) {
-                _showSnackBar(context, uploadMessage, true);
+              if (status == '新規投稿') {
+                await model.firstFetchPosts();
               }
-              await model.firstFetchPosts();
             },
             tooltip: '新規記事投稿',
             child: Icon(Icons.add),
@@ -199,7 +197,6 @@ class HomePage extends StatelessWidget {
                     Row(
                       children: [
                         _showUserImage(
-                            model,
                             model.getPostedUserInfo(posts[index].uid) != null
                                 ? model
                                     .getPostedUserInfo(posts[index].uid)!
@@ -276,7 +273,7 @@ class HomePage extends StatelessWidget {
   }
 
   /// ユーザー画像を表示
-  Widget _showUserImage(HomeModel model, String userImageUrl, double size) {
+  Widget _showUserImage(String userImageUrl, double size) {
     if (userImageUrl.isEmpty) {
       return Icon(
         Icons.account_circle,

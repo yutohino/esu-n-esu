@@ -4,7 +4,7 @@ import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_model.dart';
 import 'package:esu_n_esu/domain/AppUser.dart';
 import 'package:esu_n_esu/domain/post.dart';
-import 'package:esu_n_esu/edit/edit_post_page.dart';
+import 'package:esu_n_esu/edit_post/edit_post_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -45,7 +45,7 @@ class ContentPage extends StatelessWidget {
                                 builder: (context) => EditPostPage(model.post),
                               ));
                           if (status == '更新') {
-                            await model.updatePost();
+                            await model.reloadPost();
                           }
                           if (status == '削除') {
                             model.deletePost();

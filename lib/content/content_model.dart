@@ -27,7 +27,7 @@ class ContentModel extends ChangeNotifier {
   bool isUpdatedPost = false;
   bool isDeletedPost = false;
 
-  Future updatePost() async {
+  Future reloadPost() async {
     final snapshot =
         await FirebaseFirestore.instance.collection('posts').doc(post.id).get();
     post = Post(snapshot);

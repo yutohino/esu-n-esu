@@ -170,7 +170,7 @@ class EditPostModel extends ChangeNotifier {
     }
 
     // Firestoreに更新したポストをアップロード
-    await FirebaseFirestore.instance.collection('posts').doc(post!.id).update({
+    await doc.update({
       'title': title,
       'content': content,
       'imageUrls': imageUrlsList,

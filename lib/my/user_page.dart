@@ -4,7 +4,8 @@ import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_page.dart';
 import 'package:esu_n_esu/domain/AppUser.dart';
 import 'package:esu_n_esu/domain/post.dart';
-import 'package:esu_n_esu/edit/edit_post_page.dart';
+import 'package:esu_n_esu/edit_post/edit_post_page.dart';
+import 'package:esu_n_esu/edit_profile/edit_profile_page.dart';
 import 'package:esu_n_esu/my/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -97,14 +98,28 @@ class UserPage extends StatelessWidget {
                       padding: EdgeInsets.all(8),
                       child: Row(
                         children: [
-                          _showUserImage(model, model.user.userImageUrl, 80),
+                          _showUserImage(model.user.userImageUrl, 80),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 TextButton(
                                   onPressed: () async {
-                                    // TODO: マイページ編集画面に遷移する
+                                    String? updatedMessage =
+                                        await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            EditProfilePage(model.user),
+                                      ),
+                                    );
+
+                                    if (updatedMessage != null) {
+                                      _showSnackBar(
+                                          context, updatedMessage, true);
+                                    }
+                                    await model.reloadUserProfile();
+                                    await model.firstFetchPosts();
                                   },
                                   style: TextButton.styleFrom(
                                     backgroundColor: Palette.mainColor,
@@ -154,7 +169,7 @@ class UserPage extends StatelessWidget {
                         padding: EdgeInsets.all(8),
                         child: Text(
                           model.user.userDetail,
-                          maxLines: 7,
+                          maxLines: 16,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 16,
@@ -298,7 +313,7 @@ class UserPage extends StatelessWidget {
                     SizedBox(height: 8),
                     Row(
                       children: [
-                        _showUserImage(model, model.user.userImageUrl, 28),
+                        _showUserImage(model.user.userImageUrl, 28),
                         SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -367,7 +382,7 @@ class UserPage extends StatelessWidget {
   }
 
   /// ユーザー画像を表示
-  Widget _showUserImage(UserModel model, String userImageUrl, double size) {
+  Widget _showUserImage(String userImageUrl, double size) {
     if (userImageUrl.isEmpty) {
       return Icon(
         Icons.account_circle,
@@ -380,11 +395,9 @@ class UserPage extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         image: DecorationImage(
-            image: NetworkImage(userImageUrl),
-            onError: (error, stackTrace) {
-              print(stackTrace);
-            },
-            fit: BoxFit.cover),
+          image: NetworkImage(userImageUrl),
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

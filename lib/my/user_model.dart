@@ -80,6 +80,13 @@ class UserModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future reloadUserProfile() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(user.id).get();
+    user = AppUser(snapshot);
+    notifyListeners();
+  }
+
   /// 取得したポストの情報とフラグをリセット
   void _reset() {
     posts = [];

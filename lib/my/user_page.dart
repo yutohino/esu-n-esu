@@ -96,50 +96,14 @@ class UserPage extends StatelessWidget {
                   children: [
                     Container(
                       padding: EdgeInsets.all(8),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _showUserImage(model.user.userImageUrl, 80),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                TextButton(
-                                  onPressed: () async {
-                                    String? updatedMessage =
-                                        await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            EditProfilePage(model.user),
-                                      ),
-                                    );
-
-                                    if (updatedMessage != null) {
-                                      _showSnackBar(
-                                          context, updatedMessage, true);
-                                    }
-                                    await model.reloadUserProfile();
-                                    await model.firstFetchPosts();
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Palette.mainColor,
-                                    foregroundColor: Colors.white,
-                                    shape: StadiumBorder(),
-                                    padding:
-                                        EdgeInsets.fromLTRB(15, 10, 15, 10),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.edit_outlined),
-                                      SizedBox(
-                                        width: 4,
-                                      ),
-                                      Text('編集'),
-                                    ],
-                                  ),
-                                ),
-                                Row(
+                          Row(
+                            children: [
+                              _showUserImage(model.user.userImageUrl, 80),
+                              Expanded(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     SizedBox(
@@ -148,7 +112,7 @@ class UserPage extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         model.user.username,
-                                        maxLines: 1,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 24,
@@ -158,27 +122,60 @@ class UserPage extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                              ),
+                            ],
+                          ),
+                          if (model.user.userDetail.isNotEmpty) ...{
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              child: Text(
+                                model.user.userDetail,
+                                maxLines: 16,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  height: 1.2,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          },
+                          TextButton(
+                            onPressed: () async {
+                              String? updatedMessage = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      EditProfilePage(model.user),
+                                ),
+                              );
+
+                              if (updatedMessage != null) {
+                                _showSnackBar(context, updatedMessage, true);
+                              }
+                              await model.reloadUserProfile();
+                              await model.firstFetchPosts();
+                            },
+                            style: TextButton.styleFrom(
+                              backgroundColor: Palette.mainColor,
+                              foregroundColor: Colors.white,
+                              shape: StadiumBorder(),
+                              padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.edit_outlined),
+                                SizedBox(
+                                  width: 4,
+                                ),
+                                Text('編集'),
                               ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    if (model.user.userDetail.isNotEmpty) ...{
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text(
-                          model.user.userDetail,
-                          maxLines: 16,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 16,
-                            height: 1.2,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ),
-                    },
                     Container(
                       height: 0.25,
                       width: double.infinity,

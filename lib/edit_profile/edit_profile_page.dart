@@ -104,8 +104,13 @@ class EditProfilePage extends StatelessWidget {
                     ),
                     InkWell(
                       onTap: () async {
-                        await _showEditUserDetailDialog(context, model);
-                        model.setUserDetail(model.userDetailController.text);
+                        String? editedUserDetail =
+                            await _showEditUserDetailDialog(context, model);
+                        if (editedUserDetail != null) {
+                          model.setUserDetail(editedUserDetail);
+                        } else {
+                          model.userDetailController.text = model.userDetail;
+                        }
                       },
                       child: Container(
                         width: double.infinity,
@@ -221,20 +226,24 @@ class EditProfilePage extends StatelessWidget {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
+          insetPadding: EdgeInsets.all(16),
           title: Text('自己紹介文'),
-          content: TextField(
-            controller: model.userDetailController,
-            autofocus: true,
-            maxLength: 120,
-            maxLines: 16,
-            decoration: InputDecoration(
-              hintText: '自己紹介文',
+          content: SizedBox(
+            width: 500,
+            child: TextField(
+              controller: model.userDetailController,
+              autofocus: true,
+              maxLength: 120,
+              maxLines: 16,
+              decoration: InputDecoration(
+                hintText: '自己紹介文',
+              ),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(context, model.userDetailController.text);
               },
               child: Text(
                 '保存する',

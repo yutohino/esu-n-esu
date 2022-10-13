@@ -133,13 +133,15 @@ class ContentPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(width: 4),
-                              Text(
-                                user.username,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black54,
+                              Expanded(
+                                child: Text(
+                                  user.username,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
+                                  ),
                                 ),
                               ),
                             ],
@@ -231,9 +233,9 @@ class ContentPage extends StatelessWidget {
   }
 
   Widget _uploadedImageBox(BuildContext context, String imageUrl) {
-    return GestureDetector(
+    return InkWell(
       onTap: () {
-        // TODO: ポップアップ表示的なことをする
+        _showImageDialog(context, imageUrl);
       },
       child: Container(
         height: 80,
@@ -252,4 +254,26 @@ class ContentPage extends StatelessWidget {
       ),
     );
   }
+
+  /// 画像をダイアログで表示する
+  Future _showImageDialog(BuildContext context, String imageUrl) => showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          insetPadding: EdgeInsets.all(16),
+          content: SizedBox(
+            height: 500,
+            width: 500,
+            child: Image.network(
+              imageUrl,
+              errorBuilder: (BuildContext context, Object exception,
+                  StackTrace? stackTrace) {
+                return Icon(
+                  Icons.image_not_supported_outlined,
+                  size: 500,
+                );
+              },
+            ),
+          ),
+        ),
+      );
 }

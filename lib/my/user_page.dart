@@ -2,7 +2,7 @@
 
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_page.dart';
-import 'package:esu_n_esu/domain/AppUser.dart';
+import 'package:esu_n_esu/domain/app_user.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit_post/edit_post_page.dart';
 import 'package:esu_n_esu/edit_profile/edit_profile_page.dart';
@@ -21,14 +21,16 @@ class UserPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<UserModel>(
-      create: (_) => UserModel(user)..firstFetchPosts(),
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Palette.mainColor,
-          title: Text('マイページ'),
-          actions: [
-            Consumer<UserModel>(builder: (context, model, child) {
-              return PopupMenuButton(
+      create: (_) => UserModel(user)..initProc(),
+      child: Consumer<UserModel>(builder: (context, model, child) {
+        // print(
+        //     'FirebaseAuth.instance.currentUserは、${FirebaseAuth.instance.currentUser}');
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Palette.mainColor,
+            title: setTitle(model),
+            actions: [
+              PopupMenuButton(
                 onSelected: (Menu selectedItem) async {
                   if (selectedItem == Menu.followList) {
                     // TODO: フォローリスト画面に遷移する
@@ -58,172 +60,147 @@ class UserPage extends StatelessWidget {
                   ];
                 },
                 icon: Icon(Icons.more_vert),
-              );
-            }),
-          ],
-        ),
-        body: Stack(
-          children: [
-            Center(
-              child: Consumer<UserModel>(builder: (context, model, child) {
-                final posts = model.posts;
-                if (posts.isEmpty) {
-                  if (!model.isFetchLastItem) {
-                    // ポストを取得するまでサークルを表示
-                    return CircularProgressIndicator(
-                      color: Palette.mainColor,
-                    );
+              ),
+            ],
+          ),
+          body: Stack(
+            children: [
+              Center(
+                child: Consumer<UserModel>(builder: (context, model, child) {
+                  final posts = model.posts;
+                  if (posts.isEmpty) {
+                    if (!model.isFetchLastItem) {
+                      // ポストを取得するまでサークルを表示
+                      return CircularProgressIndicator(
+                        color: Palette.mainColor,
+                      );
+                    }
                   }
-                }
 
-                // ポストを10件ずつリスト表示する
-                final controller = ScrollController();
-                controller.addListener(() async {
-                  if (model.isFetchLastItem) {
-                    return;
-                  }
-                  if (controller.position.maxScrollExtent ==
-                          controller.offset &&
-                      !model.isLoading) {
-                    model.startLoading();
-                    model.fetchPosts();
-                    model.endLoading();
-                  }
-                });
+                  // ポストを10件ずつリスト表示する
+                  final controller = ScrollController();
+                  controller.addListener(() async {
+                    if (model.isFetchLastItem) {
+                      return;
+                    }
+                    if (controller.position.maxScrollExtent ==
+                            controller.offset &&
+                        !model.isLoading) {
+                      model.startLoading();
+                      model.fetchPosts();
+                      model.endLoading();
+                    }
+                  });
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              _showUserImage(model.user.userImageUrl, 80),
-                              Expanded(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      width: 8,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        model.user.username,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                _showUserImage(model.user.userImageUrl, 80),
+                                Expanded(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          model.user.username,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          if (model.user.userDetail.isNotEmpty) ...{
-                            Container(
-                              padding: EdgeInsets.all(8),
-                              child: Text(
-                                model.user.userDetail,
-                                maxLines: 16,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  height: 1.2,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
-                          },
-                          TextButton(
-                            onPressed: () async {
-                              String? updatedMessage = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      EditProfilePage(model.user),
-                                ),
-                              );
-
-                              if (updatedMessage != null) {
-                                _showSnackBar(context, updatedMessage, true);
-                              }
-                              await model.reloadUserProfile();
-                              await model.firstFetchPosts();
-                            },
-                            style: TextButton.styleFrom(
-                              backgroundColor: Palette.mainColor,
-                              foregroundColor: Colors.white,
-                              shape: StadiumBorder(),
-                              padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.edit_outlined),
-                                SizedBox(
-                                  width: 4,
-                                ),
-                                Text('編集'),
                               ],
                             ),
-                          ),
-                        ],
+                            if (model.user.userDetail.isNotEmpty) ...{
+                              Container(
+                                padding: EdgeInsets.all(8),
+                                child: Text(
+                                  model.user.userDetail,
+                                  maxLines: 16,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    height: 1.2,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ),
+                            },
+                            if (model.loginUser != null &&
+                                model.isMyAccount()) ...{
+                              // ログイン中のアカウントの場合
+                              _showEditMyAccountButton(context, model),
+                            } else ...{
+                              // 他ユーザーのアカウントの場合
+                              _showFollowButton(context, model),
+                            },
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 0.25,
+                        width: double.infinity,
+                        color: Colors.grey,
+                      ),
+                      _buildListView(controller, model, posts),
+                    ],
+                  );
+                }),
+              ),
+              Consumer<UserModel>(builder: (context, model, child) {
+                if (model.isLoading) {
+                  return Container(
+                    color: Colors.black54,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Palette.mainColor,
                       ),
                     ),
-                    Container(
-                      height: 0.25,
-                      width: double.infinity,
-                      color: Colors.grey,
-                    ),
-                    _buildListView(controller, model, posts),
-                  ],
-                );
+                  );
+                } else {
+                  return Container();
+                }
               }),
-            ),
-            Consumer<UserModel>(builder: (context, model, child) {
-              if (model.isLoading) {
-                return Container(
-                  color: Colors.black54,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: Palette.mainColor,
-                    ),
-                  ),
-                );
-              } else {
-                return Container();
-              }
-            }),
-          ],
-        ),
-        floatingActionButton:
-            Consumer<UserModel>(builder: (context, model, child) {
-          return FloatingActionButton(
-            backgroundColor: Palette.mainColor,
-            onPressed: () async {
-              String? uploadMessage = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditPostPage(null),
-                    fullscreenDialog: true,
-                  ));
+            ],
+          ),
+          floatingActionButton:
+              Consumer<UserModel>(builder: (context, model, child) {
+            return FloatingActionButton(
+              backgroundColor: Palette.mainColor,
+              onPressed: () async {
+                String? uploadMessage = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditPostPage(null),
+                      fullscreenDialog: true,
+                    ));
 
-              if (uploadMessage != null) {
-                _showSnackBar(context, uploadMessage, true);
-              }
-              await model.firstFetchPosts();
-            },
-            tooltip: '新規記事投稿',
-            child: Icon(Icons.add),
-          );
-        }),
-      ),
+                if (uploadMessage != null) {
+                  _showSnackBar(context, uploadMessage, true);
+                }
+                await model.firstFetchPosts();
+              },
+              tooltip: '新規記事投稿',
+              child: Icon(Icons.add),
+            );
+          }),
+        );
+      }),
     );
   }
 
@@ -295,6 +272,7 @@ class UserPage extends StatelessWidget {
                               width: 80,
                               errorBuilder: (BuildContext context,
                                   Object exception, StackTrace? stackTrace) {
+                                print('ここを通った');
                                 return Icon(
                                   Icons.image_not_supported_outlined,
                                   size: 80,
@@ -378,6 +356,16 @@ class UserPage extends StatelessWidget {
     );
   }
 
+  Widget setTitle(UserModel model) {
+    if (model.loginUser == null) {
+      return Text('');
+    } else if (model.isMyAccount()) {
+      return Text('マイページ');
+    } else {
+      return Text('ユーザーページ');
+    }
+  }
+
   /// ユーザー画像を表示
   Widget _showUserImage(String userImageUrl, double size) {
     if (userImageUrl.isEmpty) {
@@ -386,6 +374,7 @@ class UserPage extends StatelessWidget {
         size: size,
       );
     }
+    print('ここを通った');
     return Container(
       width: size,
       height: size,
@@ -395,6 +384,66 @@ class UserPage extends StatelessWidget {
           image: NetworkImage(userImageUrl),
           fit: BoxFit.cover,
         ),
+      ),
+    );
+  }
+
+  /// プロフィール編集ボタンの表示
+  Widget _showEditMyAccountButton(BuildContext context, UserModel model) {
+    return TextButton(
+      onPressed: () async {
+        String? updatedMessage = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EditProfilePage(model.user),
+          ),
+        );
+
+        if (updatedMessage != null) {
+          _showSnackBar(context, updatedMessage, true);
+        }
+        await model.reloadUserProfile();
+        await model.firstFetchPosts();
+      },
+      style: TextButton.styleFrom(
+        backgroundColor: Palette.mainColor,
+        foregroundColor: Colors.white,
+        shape: StadiumBorder(),
+        padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.edit_outlined),
+          SizedBox(
+            width: 4,
+          ),
+          Text('編集'),
+        ],
+      ),
+    );
+  }
+
+  /// フォローボタンの表示
+  Widget _showFollowButton(BuildContext context, UserModel model) {
+    // TODO: フォローの有無をチェック
+
+    return TextButton(
+      onPressed: () async {
+        // TODO: フォロー or フォロー解除
+      },
+      style: TextButton.styleFrom(
+        foregroundColor: Palette.mainColor,
+        shape: StadiumBorder(),
+        side: BorderSide(color: Palette.mainColor),
+        padding: EdgeInsets.all(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.add),
+          Text('フォロー'),
+        ],
       ),
     );
   }

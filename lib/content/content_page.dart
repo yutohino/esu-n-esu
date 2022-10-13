@@ -2,9 +2,10 @@
 
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_model.dart';
-import 'package:esu_n_esu/domain/AppUser.dart';
+import 'package:esu_n_esu/domain/app_user.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit_post/edit_post_page.dart';
+import 'package:esu_n_esu/my/user_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -21,7 +22,7 @@ class ContentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ContentModel>(
-      create: (_) => ContentModel(post),
+      create: (_) => ContentModel(post, user),
       child: Consumer<ContentModel>(
         builder: (context, model, child) {
           return WillPopScope(
@@ -102,12 +103,11 @@ class ContentPage extends StatelessWidget {
                       ),
                       InkWell(
                         onTap: () async {
-                          // TODO: ポストを投稿したユーザーのページに移動
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //       builder: (context) => EditPostPage(model.post),
-                          //     ));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => UserPage(user),
+                              ));
                         },
                         child: Container(
                           padding: EdgeInsets.fromLTRB(0, 5, 20, 5),
@@ -184,7 +184,7 @@ class ContentPage extends StatelessWidget {
                           foregroundColor: Palette.mainColor,
                           shape: StadiumBorder(),
                           side: BorderSide(color: Palette.mainColor),
-                          padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                          padding: EdgeInsets.all(10),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -205,7 +205,7 @@ class ContentPage extends StatelessWidget {
                           backgroundColor: Palette.mainColor,
                           foregroundColor: Colors.white,
                           shape: StadiumBorder(),
-                          padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                          padding: EdgeInsets.all(10),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,

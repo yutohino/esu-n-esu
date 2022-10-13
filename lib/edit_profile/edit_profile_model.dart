@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:esu_n_esu/domain/AppUser.dart';
+import 'package:esu_n_esu/domain/app_user.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,14 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EditProfileModel extends ChangeNotifier {
+  AppUser user;
+
   EditProfileModel(this.user) {
     username = user.username;
     userDetail = user.userDetail;
     usernameController.text = user.username;
     userDetailController.text = user.userDetail;
   }
-
-  AppUser user;
 
   String username = '';
   String userDetail = '';

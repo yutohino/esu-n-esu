@@ -1,13 +1,15 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:esu_n_esu/domain/app_user.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:flutter/material.dart';
 
 class ContentModel extends ChangeNotifier {
   Post post;
+  AppUser user;
 
-  ContentModel(this.post) {
+  ContentModel(this.post, this.user) {
     titleController.text = post.title;
     contentController.text = post.content;
     imageUrls = post.imageUrls;

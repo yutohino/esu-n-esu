@@ -156,7 +156,7 @@ class EditPostPage extends StatelessWidget {
                               ? Palette.mainColor
                               : Palette.mainColor.withOpacity(0.6),
                           shape: StadiumBorder(),
-                          padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                          padding: EdgeInsets.all(10),
                         ),
                         child: Text(
                           '投稿する',

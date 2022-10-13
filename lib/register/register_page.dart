@@ -64,7 +64,8 @@ class RegisterPage extends StatelessWidget {
                             await model.signUp();
                             Navigator.pop(context, '新規登録しました');
                           } catch (e) {
-                            _showSnackBar(context, e.toString(), false);
+                            _showSnackBar(context, '新規登録に失敗しました', false);
+                            print(e.toString());
                           } finally {
                             model.endLoading();
                           }

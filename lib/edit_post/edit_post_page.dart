@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, iterable_contains_unrelated_type
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit_post/edit_post_model.dart';
@@ -36,9 +35,9 @@ class EditPostPage extends StatelessWidget {
                           await model.deletePost();
                           _showSnackBar(context, 'ポストを削除しました', true);
                           Navigator.pop(context, '削除');
-                        } on FirebaseException catch (e) {
-                          print("Failed with error '${e.code}': ${e.message}");
-                          _showSnackBar(context, e.message ?? '', false);
+                        } catch (e) {
+                          _showSnackBar(context, 'ポストの削除に削除しました', false);
+                          print(e.toString());
                         } finally {
                           model.endUploading();
                         }
@@ -122,27 +121,32 @@ class EditPostPage extends StatelessWidget {
                       TextButton(
                         onPressed: isActive
                             ? () async {
+                                model.startUploading();
+                                String uploadedMessage = '';
+                                bool isUploadSuccess = false;
+                                String status = '';
                                 try {
-                                  model.startUploading();
-                                  String uploadedMessage;
-                                  String status;
                                   if (model.post == null) {
+                                    status = '新規投稿';
                                     await model.uploadNewPost();
                                     uploadedMessage = 'ポストを新規投稿しました';
-                                    status = '新規投稿';
                                   } else {
+                                    status = '更新';
                                     await model.uploadExistingPost();
                                     uploadedMessage = 'ポストを更新しました';
-                                    status = '更新';
                                   }
-                                  _showSnackBar(context, uploadedMessage, true);
+                                  isUploadSuccess = true;
                                   Navigator.pop(context, status);
-                                } on FirebaseException catch (e) {
-                                  print(
-                                      "Failed with error '${e.code}': ${e.message}");
-                                  _showSnackBar(
-                                      context, e.message ?? '', false);
+                                } catch (e) {
+                                  if (status == '新規投稿') {
+                                    uploadedMessage = 'ポストの新規投稿に失敗しました';
+                                  } else if (status == '更新') {
+                                    uploadedMessage = 'ポストの更新に失敗しました';
+                                  }
+                                  print(e.toString());
                                 } finally {
+                                  _showSnackBar(context, uploadedMessage,
+                                      isUploadSuccess);
                                   model.endUploading();
                                 }
                               }

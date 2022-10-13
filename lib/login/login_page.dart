@@ -52,7 +52,8 @@ class LoginPage extends StatelessWidget {
                             await model.login();
                             Navigator.pop(context, 'ログインしました');
                           } catch (e) {
-                            _showSnackBar(context, e.toString(), false);
+                            _showSnackBar(context, 'ログインに失敗しました', false);
+                            print(e.toString());
                           } finally {
                             model.endLoading();
                           }

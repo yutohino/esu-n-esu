@@ -142,11 +142,7 @@ class EditPostModel extends ChangeNotifier {
     } else {
       // 変更 or 削除された画像をStorageから削除
       for (String deleteImageUrl in deleteImageUrls) {
-        try {
-          await FirebaseStorage.instance.refFromURL(deleteImageUrl).delete();
-        } on FirebaseException catch (e) {
-          print("Failed with error '${e.code}': ${e.message}");
-        }
+        await FirebaseStorage.instance.refFromURL(deleteImageUrl).delete();
       }
 
       // 追加した画像をアップロード
@@ -184,11 +180,7 @@ class EditPostModel extends ChangeNotifier {
     await FirebaseFirestore.instance.collection('posts').doc(post!.id).delete();
     // アップロードした画像をStorageから削除する
     for (String imageUrl in post!.imageUrls) {
-      try {
-        await FirebaseStorage.instance.refFromURL(imageUrl).delete();
-      } on FirebaseException catch (e) {
-        print("Failed with error '${e.code}': ${e.message}");
-      }
+      await FirebaseStorage.instance.refFromURL(imageUrl).delete();
     }
   }
 }

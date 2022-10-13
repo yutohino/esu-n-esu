@@ -57,7 +57,7 @@ class UserModel extends ChangeNotifier {
     final QuerySnapshot snapshots = await FirebaseFirestore.instance
         .collection('posts')
         .where('uid', isEqualTo: user.uid)
-        .orderBy('createdAt', descending: true)
+        .orderBy('editedAt', descending: true)
         .startAfterDocument(_fetchedLastSnapshot!)
         .limit(10)
         .get();
@@ -76,7 +76,7 @@ class UserModel extends ChangeNotifier {
       final post = Post(document);
       posts.add(post);
       return post;
-    }).toList();
+    });
     notifyListeners();
   }
 

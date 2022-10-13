@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/AppUser.dart';
+import 'package:esu_n_esu/domain/post.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -60,11 +62,7 @@ class EditProfileModel extends ChangeNotifier {
     String? newUserImageUrl;
     if (editedImageFile != null) {
       if (user.userImageUrl.isNotEmpty) {
-        try {
-          await FirebaseStorage.instance.refFromURL(user.userImageUrl).delete();
-        } on FirebaseException catch (e) {
-          print("Failed with error '${e.code}': ${e.message}");
-        }
+        await FirebaseStorage.instance.refFromURL(user.userImageUrl).delete();
       }
       final task = await FirebaseStorage.instance
           .ref('users/${doc.id}${editedImageFile.hashCode}')
@@ -81,6 +79,31 @@ class EditProfileModel extends ChangeNotifier {
   }
 
   Future deleteMyAccount() async {
-    // TODO: 削除処理を記述
+    final QuerySnapshot snapshots = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('uid', isEqualTo: user.uid)
+        .orderBy('editedAt', descending: true)
+        .get();
+    // 投稿したポストを全て削除
+    final batch = FirebaseFirestore.instance.batch();
+    snapshots.docs.map((document) {
+      batch.delete(document.reference);
+    });
+    await batch.commit();
+
+    // 投稿したポストの画像を全て削除
+    await Future.wait(snapshots.docs.map((document) async {
+      final post = Post(document);
+      for (String imageUrl in post.imageUrls) {
+        await FirebaseStorage.instance.refFromURL(imageUrl).delete();
+      }
+    }));
+
+    // アカウント情報とユーザー画像を削除する
+    await FirebaseFirestore.instance.collection('users').doc(user.id).delete();
+    if (user.userImageUrl.isNotEmpty) {
+      await FirebaseStorage.instance.refFromURL(user.userImageUrl).delete();
+    }
+    await FirebaseAuth.instance.currentUser!.delete();
   }
 }

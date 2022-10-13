@@ -26,11 +26,25 @@ class EditProfilePage extends StatelessWidget {
               return PopupMenuButton(
                 onSelected: (Menu selectedItem) async {
                   if (selectedItem == Menu.deleteAccount) {
+                    String? deleteMessage =
+                        await _showDeleteMyAccountDialog(context, model);
+                    if (deleteMessage == null) {
+                      return;
+                    }
                     model.startUploading();
-                    // TODO: アカウント削除確認ダイアログの表示
-                    // TODO: アカウント削除処理(画面遷移履歴を削除して、ホーム画面に飛ぶ)
+                    try {
+                      await model.deleteMyAccount();
+                      _showSnackBar(context, 'アカウントを削除しました', true);
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/home',
+                        (_) => false,
+                      );
+                    } catch (e) {
+                      _showSnackBar(context, 'アカウントの削除に失敗しました', false);
+                      print(e.toString());
+                    }
                     model.endUploading();
-                    Navigator.pop(context, 'アカウントを削除しました');
                   }
                 },
                 itemBuilder: (BuildContext context) {
@@ -120,8 +134,8 @@ class EditProfilePage extends StatelessWidget {
                           await model.saveEditedProfile();
                           Navigator.pop(context, 'プロフィールを更新しました');
                         } catch (e) {
+                          _showSnackBar(context, 'プロフィールの更新に失敗しました', false);
                           print(e.toString());
-                          _showSnackBar(context, e.toString() ?? '', false);
                         } finally {
                           model.endUploading();
                         }
@@ -224,6 +238,29 @@ class EditProfilePage extends StatelessWidget {
               },
               child: Text(
                 '保存する',
+                style: TextStyle(
+                  color: Palette.mainColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  /// アカウント削除の確認ダイアログの表示
+  Future _showDeleteMyAccountDialog(
+          BuildContext context, EditProfileModel model) =>
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: Text('アカウントを削除すると、あなたの投稿したポストも全て削除されます。本当にアカウントを削除しますか?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, 'アカウントを削除しました');
+              },
+              child: Text(
+                '削除する',
                 style: TextStyle(
                   color: Palette.mainColor,
                 ),

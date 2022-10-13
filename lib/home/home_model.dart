@@ -57,7 +57,7 @@ class HomeModel extends ChangeNotifier {
     // 最後に取得したドキュメントを起点に、ポストを10件取得
     final QuerySnapshot snapshots = await FirebaseFirestore.instance
         .collection('posts')
-        .orderBy('createdAt', descending: true)
+        .orderBy('editedAt', descending: true)
         .startAfterDocument(_fetchedLastSnapshot!)
         .limit(10)
         .get();
@@ -76,7 +76,7 @@ class HomeModel extends ChangeNotifier {
       final post = Post(document);
       posts.add(post);
       return post;
-    }).toList();
+    });
     notifyListeners();
   }
 

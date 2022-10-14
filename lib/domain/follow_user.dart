@@ -5,10 +5,10 @@ class FollowUser {
     Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
     id = doc.id;
     uid = data['uid'];
-    followUserList = List.from(data['followList']);
+    followUserUidList = List.from(data['followUserUidList']);
   }
 
   String id = '';
   String uid = '';
-  List<String> followUserList = [];
+  List<String> followUserUidList = [];
 }

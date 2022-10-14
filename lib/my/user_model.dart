@@ -17,6 +17,8 @@ class UserModel extends ChangeNotifier {
 
   AppUser? loginUser;
 
+  bool isFollowUser = false;
+
   void startLoading() {
     isLoading = true;
     notifyListeners();
@@ -30,6 +32,10 @@ class UserModel extends ChangeNotifier {
   Future initProc() async {
     // ログイン中のユーザーアカウント情報を取得
     await _getLoginUserAccount();
+    // フォローの状態を取得
+    if (loginUser != null) {
+      await _getStatusFollow();
+    }
     // ポストを初回10件取得
     await firstFetchPosts();
   }
@@ -121,18 +127,22 @@ class UserModel extends ChangeNotifier {
     return user.uid == loginUser!.uid;
   }
 
+  /// ユーザーページのユーザーをフォローしているかチェック
   Future _getStatusFollow() async {
-    // TODO：フォローリストを取得
     final snapshot = await FirebaseFirestore.instance
         .collection('follow')
-        .where('uid', isEqualTo: user.uid)
+        .where('uid', isEqualTo: loginUser!.uid)
         .get();
+    // TODO: アカウント新規作成時に、followコレクションとドキュメントを作成する
+    // TODO: (↑現状followコレクションが無いのでエラーが発生する)
     FollowUser followUser = FollowUser(snapshot.docs[0]);
-    // TODO: フォローリストからuidの一致するデータを取得する(ループで)
-    followUser.followUserList.map((followUser) {
-      // followUser
+    // フォローリストからuidの一致するユーザーデータを取得
+    followUser.followUserUidList.map((followUserUid) {
+      if (followUserUid == user.uid) {
+        isFollowUser = true;
+        return;
+      }
     });
-    // TODO: 一致するデータがあれば true、なければfalse
   }
 
   Future logout() async {

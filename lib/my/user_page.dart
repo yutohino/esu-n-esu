@@ -157,7 +157,10 @@ class UserPage extends StatelessWidget {
                         width: double.infinity,
                         color: Colors.grey,
                       ),
-                      _buildListView(controller, model, posts),
+                      Flexible(
+                        flex: 1,
+                        child: _buildListView(controller, model, posts),
+                      )
                     ],
                   );
                 }),
@@ -214,7 +217,6 @@ class UserPage extends StatelessWidget {
       },
       child: ListView.separated(
         controller: controller,
-        shrinkWrap: true,
         physics: AlwaysScrollableScrollPhysics(),
         itemCount: posts.length + 1,
         itemBuilder: (BuildContext context, int index) {

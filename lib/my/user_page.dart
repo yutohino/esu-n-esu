@@ -184,24 +184,28 @@ class UserPage extends StatelessWidget {
           ),
           floatingActionButton:
               Consumer<UserModel>(builder: (context, model, child) {
-            return FloatingActionButton(
-              backgroundColor: Palette.mainColor,
-              onPressed: () async {
-                String? uploadMessage = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditPostPage(null),
-                      fullscreenDialog: true,
-                    ));
+            if (model.loginUser != null && model.isMyAccount()) {
+              return FloatingActionButton(
+                backgroundColor: Palette.mainColor,
+                onPressed: () async {
+                  String? uploadMessage = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditPostPage(null),
+                        fullscreenDialog: true,
+                      ));
 
-                if (uploadMessage != null) {
-                  _showSnackBar(context, uploadMessage, true);
-                }
-                await model.firstFetchPosts();
-              },
-              tooltip: '新規記事投稿',
-              child: Icon(Icons.add),
-            );
+                  if (uploadMessage != null) {
+                    _showSnackBar(context, uploadMessage, true);
+                  }
+                  await model.firstFetchPosts();
+                },
+                tooltip: '新規記事投稿',
+                child: Icon(Icons.add),
+              );
+            } else {
+              return SizedBox();
+            }
           }),
         );
       }),

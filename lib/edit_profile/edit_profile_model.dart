@@ -88,7 +88,7 @@ class EditProfileModel extends ChangeNotifier {
     final batch = FirebaseFirestore.instance.batch();
     snapshots.docs.map((document) {
       batch.delete(document.reference);
-    });
+    }).toList();
     await batch.commit();
 
     // 投稿したポストの画像を全て削除
@@ -97,7 +97,7 @@ class EditProfileModel extends ChangeNotifier {
       for (String imageUrl in post.imageUrls) {
         await FirebaseStorage.instance.refFromURL(imageUrl).delete();
       }
-    }));
+    }).toList());
 
     // アカウント情報とユーザー画像を削除する
     await FirebaseFirestore.instance.collection('users').doc(user.id).delete();

@@ -28,7 +28,6 @@ class UserPage extends StatelessWidget {
             backgroundColor: Palette.mainColor,
             title: setTitle(model),
             actions: [
-              // TODO: 自分以外のユーザーの場合は非表示にする
               if (model.loginUser != null && model.isMyAccount()) ...{
                 PopupMenuButton(
                   onSelected: (Menu selectedItem) async {
@@ -276,7 +275,6 @@ class UserPage extends StatelessWidget {
                               width: 80,
                               errorBuilder: (BuildContext context,
                                   Object exception, StackTrace? stackTrace) {
-                                print('ここを通った');
                                 return Icon(
                                   Icons.image_not_supported_outlined,
                                   size: 80,
@@ -376,7 +374,6 @@ class UserPage extends StatelessWidget {
         size: size,
       );
     }
-    print('ここを通った');
     return Container(
       width: size,
       height: size,
@@ -428,22 +425,30 @@ class UserPage extends StatelessWidget {
 
   /// フォローボタンの表示
   Widget _showFollowButton(BuildContext context, UserModel model) {
-    // TODO: フォローの有無をチェック
-
     return TextButton(
       onPressed: () async {
-        // TODO: フォロー or フォロー解除
+        String? followedMessage = await model.followUser();
+        if (followedMessage != null) {
+          _showSnackBar(context, followedMessage, true);
+        }
       },
-      style: TextButton.styleFrom(
-        foregroundColor: Palette.mainColor,
-        shape: StadiumBorder(),
-        side: BorderSide(color: Palette.mainColor),
-        padding: EdgeInsets.all(10),
-      ),
+      style: model.isFollowUser
+          ? TextButton.styleFrom(
+              backgroundColor: Palette.mainColor,
+              foregroundColor: Colors.white,
+              shape: StadiumBorder(),
+              padding: EdgeInsets.all(10),
+            )
+          : TextButton.styleFrom(
+              foregroundColor: Palette.mainColor,
+              shape: StadiumBorder(),
+              side: BorderSide(color: Palette.mainColor),
+              padding: EdgeInsets.all(10),
+            ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.add),
+          model.isFollowUser ? Icon(Icons.check) : Icon(Icons.add),
           Text('フォロー'),
         ],
       ),

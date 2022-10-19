@@ -48,7 +48,7 @@ class HomeModel extends ChangeNotifier {
       final post = Post(document);
       posts.add(post);
       await _addUserInfo(post.uid);
-    }));
+    }).toList());
     notifyListeners();
   }
 
@@ -76,7 +76,7 @@ class HomeModel extends ChangeNotifier {
       final post = Post(document);
       posts.add(post);
       return post;
-    });
+    }).toList();
     notifyListeners();
   }
 

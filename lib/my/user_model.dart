@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/app_user.dart';
-import 'package:esu_n_esu/domain/follow_user.dart';
+import 'package:esu_n_esu/domain/follow_users.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +16,8 @@ class UserModel extends ChangeNotifier {
   bool isFetchLastItem = false;
 
   AppUser? loginUser;
+
+  FollowUsers? followUsers;
 
   bool isFollowUser = false;
 
@@ -34,8 +36,10 @@ class UserModel extends ChangeNotifier {
     await _getLoginUserAccount();
     // フォローの状態を取得
     if (loginUser != null && !isMyAccount()) {
-      await _getStatusFollow();
+      await _getFollowUsers();
+      _getFollowStatus();
     }
+
     // ポストを初回10件取得
     await firstFetchPosts();
   }
@@ -92,7 +96,7 @@ class UserModel extends ChangeNotifier {
       final post = Post(document);
       posts.add(post);
       return post;
-    });
+    }).toList();
     notifyListeners();
   }
 
@@ -127,29 +131,65 @@ class UserModel extends ChangeNotifier {
     return user.uid == loginUser!.uid;
   }
 
-  /// ユーザーページのユーザーをフォローしているかチェック
-  Future _getStatusFollow() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('follows')
+  /// ログインしているユーザーのフォロー情報を取得する
+  Future _getFollowUsers() async {
+    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection('follow')
         .where('uid', isEqualTo: loginUser!.uid)
         .get();
     if (snapshot.size == 0) {
       // followsにドキュメントが無い場合は作成する
-      final docFollows =
-          FirebaseFirestore.instance.collection('follows').doc(loginUser!.uid);
-      await docFollows.set({
+      await FirebaseFirestore.instance
+          .collection('follow')
+          .doc(loginUser!.uid)
+          .set({
         'uid': loginUser!.uid,
       });
+      snapshot = await FirebaseFirestore.instance
+          .collection('follow')
+          .where('uid', isEqualTo: loginUser!.uid)
+          .get();
       return;
     }
-    FollowUser followUser = FollowUser(snapshot.docs[0]);
+    followUsers = FollowUsers(snapshot.docs[0]);
+  }
+
+  /// ユーザーページのユーザーをフォローしているかチェック
+  void _getFollowStatus() {
     // フォローリストからuidの一致するユーザーデータを取得
-    followUser.followUserUidList.map((followUserUid) {
+    followUsers!.followUsersUidList.map((followUserUid) {
       if (followUserUid == user.uid) {
         isFollowUser = true;
         return;
       }
+    }).toList();
+  }
+
+  /// ユーザーをフォロー登録/解除する
+  Future<String?> followUser() async {
+    String? resultMessage;
+    if (isFollowUser) {
+      // フォロー解除
+      followUsers!.followUsersUidList.remove(user.uid);
+      isFollowUser = false;
+      resultMessage = 'フォローを解除しました';
+    } else {
+      // フォロー登録
+      followUsers!.followUsersUidList.add(user.uid);
+      followUsers!.followUsersUidList =
+          followUsers!.followUsersUidList.toSet().toList(); // 重複する値を削除
+      isFollowUser = true;
+      resultMessage = 'フォローしました';
+    }
+    await FirebaseFirestore.instance
+        .collection('follow')
+        .doc(loginUser!.uid)
+        .update({
+      'followUsersUidList': followUsers!.followUsersUidList,
     });
+    notifyListeners();
+    return resultMessage;
   }
 
   Future logout() async {

@@ -53,11 +53,17 @@ class RegisterModel extends ChangeNotifier {
         final uid = user.uid;
 
         // Firestoreに追加
-        final doc = FirebaseFirestore.instance.collection('users').doc(uid);
-        await doc.set({
+        final docUsers =
+            FirebaseFirestore.instance.collection('users').doc(uid);
+        await docUsers.set({
           'uid': uid,
           'username': username,
           'email': email,
+        });
+        final docFollows =
+            FirebaseFirestore.instance.collection('follows').doc(uid);
+        await docFollows.set({
+          'uid': uid,
         });
       }
     }

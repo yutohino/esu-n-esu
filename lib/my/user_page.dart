@@ -23,44 +23,45 @@ class UserPage extends StatelessWidget {
     return ChangeNotifierProvider<UserModel>(
       create: (_) => UserModel(user)..initProc(),
       child: Consumer<UserModel>(builder: (context, model, child) {
-        // print(
-        //     'FirebaseAuth.instance.currentUserは、${FirebaseAuth.instance.currentUser}');
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Palette.mainColor,
             title: setTitle(model),
             actions: [
-              PopupMenuButton(
-                onSelected: (Menu selectedItem) async {
-                  if (selectedItem == Menu.followList) {
-                    // TODO: フォローリスト画面に遷移する
-                  } else if (selectedItem == Menu.bookMarkList) {
-                    // TODO: ブックマーク画面に遷移する
-                  } else if (selectedItem == Menu.logout) {
-                    model.startLoading();
-                    await model.logout();
-                    model.endLoading();
-                    Navigator.pop(context, 'ログアウトしました');
-                  }
-                },
-                itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<Menu>>[
-                    PopupMenuItem<Menu>(
-                      value: Menu.followList,
-                      child: Text('フォローリスト'),
-                    ),
-                    PopupMenuItem<Menu>(
-                      value: Menu.bookMarkList,
-                      child: Text('ブックマークリスト'),
-                    ),
-                    PopupMenuItem<Menu>(
-                      value: Menu.logout,
-                      child: Text('ログアウト'),
-                    ),
-                  ];
-                },
-                icon: Icon(Icons.more_vert),
-              ),
+              // TODO: 自分以外のユーザーの場合は非表示にする
+              if (model.loginUser != null && model.isMyAccount()) ...{
+                PopupMenuButton(
+                  onSelected: (Menu selectedItem) async {
+                    if (selectedItem == Menu.followList) {
+                      // TODO: フォローリスト画面に遷移する
+                    } else if (selectedItem == Menu.bookMarkList) {
+                      // TODO: ブックマーク画面に遷移する
+                    } else if (selectedItem == Menu.logout) {
+                      model.startLoading();
+                      await model.logout();
+                      model.endLoading();
+                      Navigator.pop(context, 'ログアウトしました');
+                    }
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<Menu>>[
+                      PopupMenuItem<Menu>(
+                        value: Menu.followList,
+                        child: Text('フォローリスト'),
+                      ),
+                      PopupMenuItem<Menu>(
+                        value: Menu.bookMarkList,
+                        child: Text('ブックマークリスト'),
+                      ),
+                      PopupMenuItem<Menu>(
+                        value: Menu.logout,
+                        child: Text('ログアウト'),
+                      ),
+                    ];
+                  },
+                  icon: Icon(Icons.more_vert),
+                ),
+              },
             ],
           ),
           body: Stack(
@@ -141,13 +142,14 @@ class UserPage extends StatelessWidget {
                                 ),
                               ),
                             },
-                            if (model.loginUser != null &&
-                                model.isMyAccount()) ...{
-                              // ログイン中のアカウントの場合
-                              _showEditMyAccountButton(context, model),
-                            } else ...{
-                              // 他ユーザーのアカウントの場合
-                              _showFollowButton(context, model),
+                            if (model.loginUser != null) ...{
+                              if (model.isMyAccount()) ...{
+                                // ログイン中のアカウントの場合
+                                _showEditMyAccountButton(context, model),
+                              } else ...{
+                                // 他ユーザーのアカウントの場合
+                                _showFollowButton(context, model),
+                              }
                             },
                           ],
                         ),
@@ -359,9 +361,7 @@ class UserPage extends StatelessWidget {
   }
 
   Widget setTitle(UserModel model) {
-    if (model.loginUser == null) {
-      return Text('');
-    } else if (model.isMyAccount()) {
+    if (model.loginUser != null && model.isMyAccount()) {
       return Text('マイページ');
     } else {
       return Text('ユーザーページ');

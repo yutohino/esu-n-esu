@@ -123,7 +123,6 @@ class EditPostPage extends StatelessWidget {
                             ? () async {
                                 model.startUploading();
                                 String uploadedMessage = '';
-                                bool isUploadSuccess = false;
                                 String status = '';
                                 try {
                                   if (model.post == null) {
@@ -135,18 +134,17 @@ class EditPostPage extends StatelessWidget {
                                     await model.uploadExistingPost();
                                     uploadedMessage = 'ポストを更新しました';
                                   }
-                                  isUploadSuccess = true;
-                                  Navigator.pop(context, status);
+                                  Navigator.pop(context, uploadedMessage);
                                 } catch (e) {
                                   if (status == '新規投稿') {
                                     uploadedMessage = 'ポストの新規投稿に失敗しました';
                                   } else if (status == '更新') {
                                     uploadedMessage = 'ポストの更新に失敗しました';
                                   }
+                                  _showSnackBar(
+                                      context, uploadedMessage, false);
                                   print(e.toString());
                                 } finally {
-                                  _showSnackBar(context, uploadedMessage,
-                                      isUploadSuccess);
                                   model.endUploading();
                                 }
                               }

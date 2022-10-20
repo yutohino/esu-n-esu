@@ -51,7 +51,7 @@ class UserModel extends ChangeNotifier {
     // ポストを10件取得
     final QuerySnapshot snapshots = await FirebaseFirestore.instance
         .collection('posts')
-        .where('uid', isEqualTo: user.uid)
+        .where('uid', isEqualTo: user.id)
         .orderBy('editedAt', descending: true)
         .limit(10)
         .get();
@@ -76,7 +76,7 @@ class UserModel extends ChangeNotifier {
     // 最後に取得したドキュメントを起点に、ポストを10件取得
     final QuerySnapshot snapshots = await FirebaseFirestore.instance
         .collection('posts')
-        .where('uid', isEqualTo: user.uid)
+        .where('uid', isEqualTo: user.id)
         .orderBy('editedAt', descending: true)
         .startAfterDocument(_fetchedLastSnapshot!)
         .limit(10)
@@ -128,38 +128,34 @@ class UserModel extends ChangeNotifier {
   }
 
   bool isMyAccount() {
-    return user.uid == loginUser!.uid;
+    return user.id == loginUser!.id;
   }
 
   /// ログインしているユーザーのフォロー情報を取得する
   Future _getFollowUsers() async {
-    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
-        .instance
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
         .collection('follow')
-        .where('uid', isEqualTo: loginUser!.uid)
+        .doc(loginUser!.id)
         .get();
-    if (snapshot.size == 0) {
+    if (!snapshot.exists) {
       // followsにドキュメントが無い場合は作成する
       await FirebaseFirestore.instance
           .collection('follow')
-          .doc(loginUser!.uid)
-          .set({
-        'uid': loginUser!.uid,
-      });
+          .doc(loginUser!.id)
+          .set({});
       snapshot = await FirebaseFirestore.instance
           .collection('follow')
-          .where('uid', isEqualTo: loginUser!.uid)
+          .doc(loginUser!.id)
           .get();
-      return;
     }
-    followUsers = FollowUsers(snapshot.docs[0]);
+    followUsers = FollowUsers(snapshot);
   }
 
   /// ユーザーページのユーザーをフォローしているかチェック
   void _getFollowStatus() {
     // フォローリストからuidの一致するユーザーデータを取得
     followUsers!.followUsersUidList.map((followUserUid) {
-      if (followUserUid == user.uid) {
+      if (followUserUid == user.id) {
         isFollowUser = true;
         return;
       }
@@ -171,12 +167,12 @@ class UserModel extends ChangeNotifier {
     String? resultMessage;
     if (isFollowUser) {
       // フォロー解除
-      followUsers!.followUsersUidList.remove(user.uid);
+      followUsers!.followUsersUidList.remove(user.id);
       isFollowUser = false;
       resultMessage = 'フォローを解除しました';
     } else {
       // フォロー登録
-      followUsers!.followUsersUidList.add(user.uid);
+      followUsers!.followUsersUidList.add(user.id);
       followUsers!.followUsersUidList =
           followUsers!.followUsersUidList.toSet().toList(); // 重複する値を削除
       isFollowUser = true;
@@ -184,7 +180,7 @@ class UserModel extends ChangeNotifier {
     }
     await FirebaseFirestore.instance
         .collection('follow')
-        .doc(loginUser!.uid)
+        .doc(loginUser!.id)
         .update({
       'followUsersUidList': followUsers!.followUsersUidList,
     });

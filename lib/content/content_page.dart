@@ -15,14 +15,14 @@ enum Menu { postEdit }
 
 class ContentPage extends StatelessWidget {
   final Post post;
-  final AppUser user;
+  final AppUser user; // 投稿者のユーザー情報
 
   ContentPage(this.post, this.user);
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ContentModel>(
-      create: (_) => ContentModel(post, user),
+      create: (_) => ContentModel(post, user)..initProc(),
       child: Consumer<ContentModel>(
         builder: (context, model, child) {
           return WillPopScope(
@@ -49,7 +49,7 @@ class ContentPage extends StatelessWidget {
                             await model.reloadPost();
                           }
                           if (status == '削除') {
-                            model.deletePost();
+                            model.flagDeletedPost();
                             Navigator.pop(context, model.isDeletedPost);
                           }
                         },
@@ -175,49 +175,10 @@ class ContentPage extends StatelessWidget {
                       SizedBox(
                         height: 32,
                       ),
-                      // TODO: ブックマーク済みと未ブックマークで表示を変える
-                      TextButton(
-                        onPressed: () {
-                          // TODO: ブックマークとして登録する
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Palette.mainColor,
-                          shape: StadiumBorder(),
-                          side: BorderSide(color: Palette.mainColor),
-                          padding: EdgeInsets.all(10),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.bookmark_add_outlined),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text('ブックマーク'),
-                          ],
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // TODO: ブックマークを解除する
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Palette.mainColor,
-                          foregroundColor: Colors.white,
-                          shape: StadiumBorder(),
-                          padding: EdgeInsets.all(10),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.bookmark),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text('ブックマーク'),
-                          ],
-                        ),
-                      ),
+                      if (model.loginUser != null && !model.isMyAccount()) ...{
+                        // ログイン中 & 他ユーザーのアカウントの場合
+                        _showBookmarkButton(context, model),
+                      },
                       SizedBox(
                         height: 32,
                       ),
@@ -276,4 +237,47 @@ class ContentPage extends StatelessWidget {
           ),
         ),
       );
+
+  /// ブックマークボタンの表示
+  Widget _showBookmarkButton(BuildContext context, ContentModel model) {
+    return TextButton(
+      onPressed: () async {
+        String? followedMessage = await model.bookmarkPost();
+        if (followedMessage != null) {
+          _showSnackBar(context, followedMessage, true);
+        }
+      },
+      style: model.isBookmark
+          ? TextButton.styleFrom(
+              backgroundColor: Palette.mainColor,
+              foregroundColor: Colors.white,
+              shape: StadiumBorder(),
+              padding: EdgeInsets.all(10),
+            )
+          : TextButton.styleFrom(
+              foregroundColor: Palette.mainColor,
+              shape: StadiumBorder(),
+              side: BorderSide(color: Palette.mainColor),
+              padding: EdgeInsets.all(10),
+            ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          model.isBookmark
+              ? Icon(Icons.bookmark_added)
+              : Icon(Icons.bookmark_add_outlined),
+          Text('ブックマーク'),
+        ],
+      ),
+    );
+  }
+
+  /// スナックバーを表示
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: isSuccess ? Colors.green : Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 }

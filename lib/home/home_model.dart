@@ -11,7 +11,7 @@ class HomeModel extends ChangeNotifier {
   bool isFetchLastItem = false;
 
   List<AppUser> postedUsers = [];
-  AppUser? myUserInfo;
+  AppUser? loginUser;
 
   void startLoading() {
     isLoading = true;
@@ -26,7 +26,7 @@ class HomeModel extends ChangeNotifier {
     _reset();
 
     if (FirebaseAuth.instance.currentUser != null) {
-      await _checkMyUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      await _checkLoginUserInfo(FirebaseAuth.instance.currentUser!.uid);
     }
 
     // ポストを10件取得
@@ -83,7 +83,7 @@ class HomeModel extends ChangeNotifier {
   /// 記事のユーザー情報を取得
   AppUser? getPostedUserInfo(String uid) {
     for (AppUser user in postedUsers) {
-      if (uid == user.uid) {
+      if (uid == user.id) {
         return user;
       }
     }
@@ -94,7 +94,7 @@ class HomeModel extends ChangeNotifier {
   Future _addUserInfo(String uid) async {
     // postedUsersにユーザー情報がある場合
     for (AppUser user in postedUsers) {
-      if (uid == user.uid) {
+      if (uid == user.id) {
         return;
       }
     }
@@ -107,19 +107,19 @@ class HomeModel extends ChangeNotifier {
   }
 
   /// ログインしているユーザー情報の確認
-  Future _checkMyUserInfo(String uid) async {
-    if (myUserInfo != null) {
+  Future _checkLoginUserInfo(String uid) async {
+    if (loginUser != null) {
       return;
     }
     final snapshot =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
     final user = AppUser(snapshot);
-    myUserInfo = user;
+    loginUser = user;
   }
 
   /// 取得したポストの情報とフラグをリセット
   void _reset() {
-    myUserInfo = null;
+    loginUser = null;
     posts = [];
     _fetchedLastSnapshot = null;
     isFetchLastItem = false;

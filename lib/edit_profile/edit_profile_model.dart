@@ -81,7 +81,7 @@ class EditProfileModel extends ChangeNotifier {
   Future deleteMyAccount() async {
     final QuerySnapshot snapshots = await FirebaseFirestore.instance
         .collection('posts')
-        .where('uid', isEqualTo: user.uid)
+        .where('uid', isEqualTo: user.id)
         .orderBy('editedAt', descending: true)
         .get();
     // 投稿したポストを全て削除
@@ -98,6 +98,13 @@ class EditProfileModel extends ChangeNotifier {
         await FirebaseStorage.instance.refFromURL(imageUrl).delete();
       }
     }).toList());
+
+    await FirebaseFirestore.instance.collection('follow').doc(user.id).delete();
+
+    await FirebaseFirestore.instance
+        .collection('bookmarks')
+        .doc(user.id)
+        .delete();
 
     // アカウント情報とユーザー画像を削除する
     await FirebaseFirestore.instance.collection('users').doc(user.id).delete();

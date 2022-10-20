@@ -4,7 +4,6 @@ class AppUser {
   AppUser(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
     id = doc.id;
-    uid = data['uid'];
     email = data['email'];
     username = data['username'];
     userImageUrl = data['userImageUrl'] ?? '';
@@ -12,7 +11,6 @@ class AppUser {
   }
 
   String id = '';
-  String uid = '';
   String email = '';
   String username = '';
   String userImageUrl = '';

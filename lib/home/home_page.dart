@@ -23,19 +23,19 @@ class HomePage extends StatelessWidget {
           actions: [
             Consumer<HomeModel>(builder: (context, model, child) {
               // ログインしているユーザー情報が取得できるまで、ログインボタンを表示しない
-              if (model.myUserInfo != null) {
-                if (model.myUserInfo == null) {
+              if (model.loginUser != null) {
+                if (model.loginUser == null) {
                   return SizedBox();
                 }
               }
               return IconButton(
                 onPressed: () async {
-                  if (model.myUserInfo != null) {
+                  if (model.loginUser != null) {
                     // マイページに遷移
                     await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => UserPage(model.myUserInfo!),
+                          builder: (context) => UserPage(model.loginUser!),
                         ));
                     await model.firstFetchPosts();
                   } else {
@@ -51,8 +51,8 @@ class HomePage extends StatelessWidget {
                     }
                   }
                 },
-                icon: model.myUserInfo != null
-                    ? _showUserImage(model.myUserInfo!.userImageUrl, 36)
+                icon: model.loginUser != null
+                    ? _showUserImage(model.loginUser!.userImageUrl, 36)
                     : Icon(Icons.account_circle_outlined),
                 iconSize: 36,
               );
@@ -90,7 +90,7 @@ class HomePage extends StatelessWidget {
         ),
         floatingActionButton:
             Consumer<HomeModel>(builder: (context, model, child) {
-          if (model.myUserInfo == null) {
+          if (model.loginUser == null) {
             return Container();
           }
           return FloatingActionButton(

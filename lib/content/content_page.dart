@@ -6,7 +6,6 @@ import 'package:esu_n_esu/domain/app_user.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit_post/edit_post_page.dart';
 import 'package:esu_n_esu/my/user_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -35,8 +34,8 @@ class ContentPage extends StatelessWidget {
                 backgroundColor: Palette.mainColor,
                 title: Text(model.post.title),
                 actions: [
-                  if (FirebaseAuth.instance.currentUser != null &&
-                      model.post.uid == FirebaseAuth.instance.currentUser!.uid)
+                  if (model.loginUser != null &&
+                      model.post.uid == model.loginUser!.id)
                     Consumer<ContentModel>(builder: (context, model, child) {
                       return PopupMenuButton(
                         onSelected: (Menu selectedItem) async {

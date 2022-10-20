@@ -41,7 +41,7 @@ class ContentModel extends ChangeNotifier {
     // ログイン中のユーザーアカウント情報を取得
     await _getLoginUserAccount();
     // ブックマークの状態を取得
-    if (loginUser != null && !isMyAccount()) {
+    if (loginUser != null) {
       await _getBookmarkInfo();
       _getBookmarkStatus();
     }
@@ -59,10 +59,6 @@ class ContentModel extends ChangeNotifier {
         .doc(loginUser.uid)
         .get();
     this.loginUser = AppUser(snapshot);
-  }
-
-  bool isMyAccount() {
-    return loginUser!.id == post.uid;
   }
 
   /// ログインしているユーザーのブックマーク情報を取得する

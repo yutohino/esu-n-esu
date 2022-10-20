@@ -175,7 +175,7 @@ class ContentPage extends StatelessWidget {
                       SizedBox(
                         height: 32,
                       ),
-                      if (model.loginUser != null && !model.isMyAccount()) ...{
+                      if (model.loginUser != null) ...{
                         // ログイン中 & 他ユーザーのアカウントの場合
                         _showBookmarkButton(context, model),
                       },

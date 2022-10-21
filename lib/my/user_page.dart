@@ -1,11 +1,13 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously, must_be_immutable
 
+import 'package:esu_n_esu/bookmark_list/bookmark_list_page.dart';
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_page.dart';
 import 'package:esu_n_esu/domain/app_user.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:esu_n_esu/edit_post/edit_post_page.dart';
 import 'package:esu_n_esu/edit_profile/edit_profile_page.dart';
+import 'package:esu_n_esu/follow_list/follow_list_page.dart';
 import 'package:esu_n_esu/my/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -32,9 +34,20 @@ class UserPage extends StatelessWidget {
                 PopupMenuButton(
                   onSelected: (Menu selectedItem) async {
                     if (selectedItem == Menu.followList) {
-                      // TODO: フォローリスト画面に遷移する
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                FollowListPage(model.loginUser!),
+                          ));
                     } else if (selectedItem == Menu.bookMarkList) {
-                      // TODO: ブックマーク画面に遷移する
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                BookmarkListPage(model.loginUser!),
+                            fullscreenDialog: true,
+                          ));
                     } else if (selectedItem == Menu.logout) {
                       model.startLoading();
                       await model.logout();

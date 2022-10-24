@@ -4,9 +4,9 @@ class FollowUsers {
   FollowUsers(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
     id = doc.id;
-    followUsersUidList = List.from(data['followUsersUidList'] ?? []);
+    followUsersIdList = List.from(data['followUsersIdList'] ?? []);
   }
 
   String id = '';
-  List<String> followUsersUidList = [];
+  List<String> followUsersIdList = [];
 }

@@ -117,10 +117,6 @@ class EditPostModel extends ChangeNotifier {
     }
 
     // Firestoreに新規ポストをアップロード
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    final snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final data = snapshot.data();
     final collection = FirebaseFirestore.instance.collection('posts');
     await collection.add({
       'title': title,
@@ -128,7 +124,7 @@ class EditPostModel extends ChangeNotifier {
       'imageUrls': imageUrls,
       'createdAt': Timestamp.now(),
       'editedAt': Timestamp.now(),
-      'uid': data!['uid'],
+      'uid': FirebaseAuth.instance.currentUser!.uid,
       'isEdited': false,
     });
   }

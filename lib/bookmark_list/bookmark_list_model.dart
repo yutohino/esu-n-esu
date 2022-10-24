@@ -5,15 +5,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class BookmarkListModel extends ChangeNotifier {
+  AppUser? loginUser;
+
+  BookmarkListModel(this.loginUser);
+
   List<Post> posts = [];
   bool isLoading = false;
   DocumentSnapshot? _fetchedLastSnapshot; // 現在取得している最後のドキュメントを保持
   bool isFetchLastItem = false;
 
   List<AppUser> postedUsers = [];
-  AppUser? loginUser;
-
-  BookmarkListModel(this.loginUser);
 
   void startLoading() {
     isLoading = true;

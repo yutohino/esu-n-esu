@@ -154,8 +154,8 @@ class UserModel extends ChangeNotifier {
   /// ユーザーページのユーザーをフォローしているかチェック
   void _getFollowStatus() {
     // フォローリストからuidの一致するユーザーデータを取得
-    followUsers!.followUsersUidList.map((followUserUid) {
-      if (followUserUid == user.id) {
+    followUsers!.followUsersIdList.map((followUserId) {
+      if (followUserId == user.id) {
         isFollowUser = true;
         return;
       }
@@ -167,14 +167,14 @@ class UserModel extends ChangeNotifier {
     String? resultMessage;
     if (isFollowUser) {
       // フォロー解除
-      followUsers!.followUsersUidList.remove(user.id);
+      followUsers!.followUsersIdList.remove(user.id);
       isFollowUser = false;
       resultMessage = 'フォローを解除しました';
     } else {
       // フォロー登録
-      followUsers!.followUsersUidList.add(user.id);
-      followUsers!.followUsersUidList =
-          followUsers!.followUsersUidList.toSet().toList(); // 重複する値を削除
+      followUsers!.followUsersIdList.add(user.id);
+      followUsers!.followUsersIdList =
+          followUsers!.followUsersIdList.toSet().toList(); // 重複する値を削除
       isFollowUser = true;
       resultMessage = 'フォローしました';
     }
@@ -182,7 +182,7 @@ class UserModel extends ChangeNotifier {
         .collection('follow')
         .doc(loginUser!.id)
         .update({
-      'followUsersUidList': followUsers!.followUsersUidList,
+      'followUsersIdList': followUsers!.followUsersIdList,
     });
     notifyListeners();
     return resultMessage;

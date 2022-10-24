@@ -201,17 +201,16 @@ class UserPage extends StatelessWidget {
               return FloatingActionButton(
                 backgroundColor: Palette.mainColor,
                 onPressed: () async {
-                  String? uploadMessage = await Navigator.push(
+                  String? status = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => EditPostPage(null),
                         fullscreenDialog: true,
                       ));
 
-                  if (uploadMessage != null) {
-                    _showSnackBar(context, uploadMessage, true);
+                  if (status == '新規投稿') {
+                    await model.firstFetchPosts();
                   }
-                  await model.firstFetchPosts();
                 },
                 tooltip: '新規記事投稿',
                 child: Icon(Icons.add),
@@ -225,7 +224,7 @@ class UserPage extends StatelessWidget {
     );
   }
 
-  /// タイムラインのListViewを作成
+  /// ユーザーのポスト一覧のListViewを作成
   Widget _buildListView(
       ScrollController controller, UserModel model, List<Post> posts) {
     return RefreshIndicator(

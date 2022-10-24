@@ -72,11 +72,11 @@ class HomeModel extends ChangeNotifier {
     // 次のページ読み込み時の開始地点を設定
     _fetchedLastSnapshot = snapshots.docs.last;
 
-    snapshots.docs.map((document) {
+    await Future.wait(snapshots.docs.map((document) async {
       final post = Post(document);
       posts.add(post);
-      return post;
-    }).toList();
+      await _addUserInfo(post.uid);
+    }).toList());
     notifyListeners();
   }
 

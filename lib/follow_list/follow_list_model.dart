@@ -1,19 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/app_user.dart';
+import 'package:esu_n_esu/domain/follow_users.dart';
 import 'package:esu_n_esu/domain/post.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class FollowListModel extends ChangeNotifier {
-  List<Post> posts = [];
-  bool isLoading = false;
-  DocumentSnapshot? _fetchedLastSnapshot; // 現在取得している最後のドキュメントを保持
-  bool isFetchLastItem = false;
-
-  List<AppUser> postedUsers = [];
-  AppUser? loginUser;
+  AppUser loginUser;
 
   FollowListModel(this.loginUser);
+
+  List<Post> posts = [];
+  bool isLoading = false;
+  int retrievedFollowUserListIndex = 0; // 現在取得している最後のユーザーのインデックスを保持
+  bool isFetchLastItem = false;
+
+  FollowUsers? followUsers; // ログイン中のユーザーのフォローユーザー情報を取得
+  List<String> followUsersIdList = []; // FollowUsersのユーザーIDリスト(降順)
+  List<AppUser> followUserList = []; // FollowUsersのユーザー情報
 
   void startLoading() {
     isLoading = true;
@@ -23,108 +26,114 @@ class FollowListModel extends ChangeNotifier {
     isLoading = false;
   }
 
-  /// ポストを10件取得(初回)
-  Future firstFetchPosts() async {
+  Future initProc() async {
     _reset();
+    await _fetchFollowUsers();
+    followUsersIdList = [...followUsers!.followUsersIdList.reversed];
+    await _firstFetchFollowUserList();
+  }
 
-    if (FirebaseAuth.instance.currentUser != null) {
-      await _checkLoginUserInfo(FirebaseAuth.instance.currentUser!.uid);
-    }
-
-    // ポストを10件取得
-    final QuerySnapshot snapshots = await FirebaseFirestore.instance
-        .collection('posts')
-        .orderBy('editedAt', descending: true)
-        .limit(10)
+  /// followコレクションからフォロー情報を取得し、FollowUsersクラスを作成する
+  Future _fetchFollowUsers() async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('follow')
+        .doc(loginUser.id)
         .get();
+    if (!snapshot.exists) {
+      // followにドキュメントが無い場合は作成する
+      await FirebaseFirestore.instance
+          .collection('follow')
+          .doc(loginUser.id)
+          .set({});
+      snapshot = await FirebaseFirestore.instance
+          .collection('follow')
+          .doc(loginUser.id)
+          .get();
+    }
+    followUsers = FollowUsers(snapshot);
+  }
 
-    // 次のページ読み込み時の開始地点を設定
-    if (snapshots.docs.isNotEmpty) {
-      _fetchedLastSnapshot = snapshots.docs.last;
+  /// uidを基にusersコレクションからフォローユーザーを15件取得(初回)
+  Future _firstFetchFollowUserList() async {
+    // フォローユーザーを15件取得
+    for (int index = 0; index < 15; index++) {
+      if (index == followUsersIdList.length) {
+        break;
+      }
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(followUsersIdList[index])
+          .get();
+      followUserList.add(AppUser(snapshot));
+      retrievedFollowUserListIndex = index;
     }
 
-    // 取得したポスト数が10件未満なら、postsコレクションのドキュメント
-    isFetchLastItem = snapshots.docs.length < 10;
+    // 取得したフォローユーザーが15件以下
+    isFetchLastItem = followUsersIdList.length <= 15;
 
-    await Future.wait(snapshots.docs.map((document) async {
-      final post = Post(document);
-      posts.add(post);
-      await _addUserInfo(post.uid);
-    }).toList());
     notifyListeners();
   }
 
-  /// ポストを追加で10件取得
-  Future fetchPosts() async {
-    // 最後に取得したドキュメントを起点に、ポストを10件取得
-    final QuerySnapshot snapshots = await FirebaseFirestore.instance
-        .collection('posts')
-        .orderBy('editedAt', descending: true)
-        .startAfterDocument(_fetchedLastSnapshot!)
-        .limit(10)
-        .get();
-
-    // postsコレクションのドキュメントを全て取得したかチェック
-    isFetchLastItem = snapshots.docs.isEmpty;
-    if (isFetchLastItem) {
-      notifyListeners();
-      return;
+  /// フォローユーザーを追加で15件取得
+  Future fetchFollowUserList() async {
+    // ループで前回の最後のIndexを起点に15件取得する(上限に達したらループ中断)
+    for (int index = retrievedFollowUserListIndex + 1;
+        index < index + 15;
+        index++) {
+      if (index == followUsersIdList.length) {
+        break;
+      }
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(followUsersIdList[index])
+          .get();
+      followUserList.add(AppUser(snapshot));
+      retrievedFollowUserListIndex = index;
     }
 
-    // 次のページ読み込み時の開始地点を設定
-    _fetchedLastSnapshot = snapshots.docs.last;
+    // 残り件数がまだあるかチェック
+    final lastIndex = followUsersIdList.length - 1;
+    final remainingItems = lastIndex - retrievedFollowUserListIndex;
+    isFetchLastItem = remainingItems <= 0;
 
-    snapshots.docs.map((document) {
-      final post = Post(document);
-      posts.add(post);
-      return post;
-    }).toList();
     notifyListeners();
   }
 
-  /// 記事のユーザー情報を取得
-  AppUser? getPostedUserInfo(String uid) {
-    for (AppUser user in postedUsers) {
-      if (uid == user.id) {
-        return user;
-      }
+  /// ユーザーページのユーザーをフォローしているかチェック
+  bool isFollowUser(String userId) {
+    if (followUsers != null) {
+      return followUsers!.followUsersIdList.contains(userId);
     }
-    return null;
+    return false;
   }
 
-  /// uidを基にユーザー情報を取得してpostedUsersに追加する
-  Future _addUserInfo(String uid) async {
-    // postedUsersにユーザー情報がある場合
-    for (AppUser user in postedUsers) {
-      if (uid == user.id) {
-        return;
-      }
-    }
+  /// ユーザーをフォロー登録/解除する
+  Future<String?> followUser(String userId) async {
+    String? resultMessage;
 
-    // postedUsersに無い場合はpostedUsersコレクションから取得する
-    final snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final user = AppUser(snapshot);
-    postedUsers.add(user);
+    if (followUsers!.followUsersIdList.contains(userId)) {
+      // フォロー解除
+      followUsers!.followUsersIdList.remove(userId);
+    } else {
+      // フォロー登録
+      followUsers!.followUsersIdList.add(userId);
+    }
+    await FirebaseFirestore.instance
+        .collection('follow')
+        .doc(loginUser.id)
+        .update({
+      'followUsersIdList': followUsers!.followUsersIdList,
+    });
+    notifyListeners();
+    return resultMessage;
   }
 
-  /// ログインしているユーザー情報の確認
-  Future _checkLoginUserInfo(String uid) async {
-    if (loginUser != null) {
-      return;
-    }
-    final snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final user = AppUser(snapshot);
-    loginUser = user;
-  }
-
-  /// 取得したポストの情報とフラグをリセット
+  /// 取得しフォローユーザーの情報とフラグをリセット
   void _reset() {
-    loginUser = null;
     posts = [];
-    _fetchedLastSnapshot = null;
+    retrievedFollowUserListIndex = 0;
     isFetchLastItem = false;
-    postedUsers = [];
+    followUsers = null;
+    followUserList = [];
   }
 }

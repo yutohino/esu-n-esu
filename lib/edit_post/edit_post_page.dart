@@ -134,7 +134,8 @@ class EditPostPage extends StatelessWidget {
                                     await model.uploadExistingPost();
                                     uploadedMessage = 'ポストを更新しました';
                                   }
-                                  Navigator.pop(context, uploadedMessage);
+                                  _showSnackBar(context, uploadedMessage, true);
+                                  Navigator.pop(context, status);
                                 } catch (e) {
                                   if (status == '新規投稿') {
                                     uploadedMessage = 'ポストの新規投稿に失敗しました';

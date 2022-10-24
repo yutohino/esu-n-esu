@@ -56,14 +56,18 @@ class RegisterModel extends ChangeNotifier {
         final docUsers =
             FirebaseFirestore.instance.collection('users').doc(uid);
         await docUsers.set({
-          'uid': uid,
           'username': username,
           'email': email,
         });
         final docFollows =
             FirebaseFirestore.instance.collection('follow').doc(uid);
         await docFollows.set({
-          'uid': uid,
+          'followUsersIdList': [],
+        });
+        final docBookmarks =
+            FirebaseFirestore.instance.collection('bookmarks').doc(uid);
+        await docBookmarks.set({
+          'bookmarksDocIdList': [],
         });
       }
     }

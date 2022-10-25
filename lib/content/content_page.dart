@@ -132,7 +132,7 @@ class ContentPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(width: 4),
-                              Expanded(
+                              Flexible(
                                 child: Text(
                                   user.username,
                                   maxLines: 1,

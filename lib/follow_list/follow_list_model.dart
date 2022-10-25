@@ -108,9 +108,7 @@ class FollowListModel extends ChangeNotifier {
   }
 
   /// ユーザーをフォロー登録/解除する
-  Future<String?> followUser(String userId) async {
-    String? resultMessage;
-
+  Future followUser(String userId) async {
     if (followUsers!.followUsersIdList.contains(userId)) {
       // フォロー解除
       followUsers!.followUsersIdList.remove(userId);
@@ -125,7 +123,18 @@ class FollowListModel extends ChangeNotifier {
       'followUsersIdList': followUsers!.followUsersIdList,
     });
     notifyListeners();
-    return resultMessage;
+  }
+
+  /// 遷移先のユーザーページのフォローステータスを反映する
+  void setFollowUserStatus(String userId, bool isFollow) {
+    if (isFollow) {
+      // フォロー登録
+      followUsers!.followUsersIdList.add(userId);
+    } else {
+      // フォロー解除
+      followUsers!.followUsersIdList.remove(userId);
+    }
+    notifyListeners();
   }
 
   /// 取得しフォローユーザーの情報とフラグをリセット

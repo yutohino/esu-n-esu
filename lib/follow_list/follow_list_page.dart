@@ -3,6 +3,7 @@
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/domain/app_user.dart';
 import 'package:esu_n_esu/follow_list/follow_list_model.dart';
+import 'package:esu_n_esu/my/user_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -67,31 +68,43 @@ class FollowListPage extends StatelessWidget {
         itemCount: followUserList.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index < followUserList.length) {
-            return Container(
-              padding: EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  _showUserImage(model.followUserList[index].userImageUrl, 40),
-                  SizedBox(
-                    width: 4,
-                  ),
-                  Text(
-                    model.followUserList[index].username,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
+            final followUser = model.followUserList[index];
+            return InkWell(
+              onTap: () async {
+                bool isFollow = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserPage(followUser),
+                    ));
+                // 遷移先のユーザーページのフォローステータスを反映
+                model.setFollowUserStatus(followUser.id, isFollow);
+              },
+              child: Container(
+                padding: EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    _showUserImage(followUser.userImageUrl, 40),
+                    SizedBox(
+                      width: 4,
                     ),
-                  ),
-                  Expanded(
-                    child: SizedBox(),
-                  ),
-                  _showFollowButton(context, model, index),
-                  SizedBox(
-                    width: 8,
-                  )
-                ],
+                    Text(
+                      followUser.username,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    Expanded(
+                      child: SizedBox(),
+                    ),
+                    _showFollowButton(context, model, index),
+                    SizedBox(
+                      width: 8,
+                    )
+                  ],
+                ),
               ),
             );
           } else {
@@ -149,10 +162,7 @@ class FollowListPage extends StatelessWidget {
     final userId = model.followUserList[index].id;
     return TextButton(
       onPressed: () async {
-        String? followedMessage = await model.followUser(userId);
-        if (followedMessage != null) {
-          _showSnackBar(context, followedMessage, true);
-        }
+        await model.followUser(userId);
       },
       style: model.isFollowUser(userId)
           ? TextButton.styleFrom(

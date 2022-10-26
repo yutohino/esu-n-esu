@@ -99,7 +99,7 @@ class HomeModel extends ChangeNotifier {
       }
     }
 
-    // postedUsersに無い場合はpostedUsersコレクションから取得する
+    // postedUsersに無い場合はusersコレクションから取得する
     final snapshot =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
     final user = AppUser(snapshot);

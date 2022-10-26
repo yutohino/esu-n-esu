@@ -51,7 +51,6 @@ class UserPage extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (context) =>
                                   BookmarkListPage(model.loginUser!),
-                              fullscreenDialog: true,
                             ));
                       } else if (selectedItem == Menu.logout) {
                         model.startLoading();

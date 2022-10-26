@@ -1,18 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/app_user.dart';
+import 'package:esu_n_esu/domain/bookmarks.dart';
 import 'package:esu_n_esu/domain/post.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class BookmarkListModel extends ChangeNotifier {
-  AppUser? loginUser;
+  AppUser loginUser;
 
   BookmarkListModel(this.loginUser);
 
-  List<Post> posts = [];
   bool isLoading = false;
-  DocumentSnapshot? _fetchedLastSnapshot; // 現在取得している最後のドキュメントを保持
+  int retrievedBookmarksDocIdListIndex = 0; // 現在取得している最後のユーザーのインデックスを保持
   bool isFetchLastItem = false;
+
+  Bookmarks? bookmarks; // ログイン中のユーザーのブックマーク情報を取得
+  List<String> bookmarksDocIdList = []; // BookmarksのユーザーIDリスト(降順)
+  List<Post> posts = [];
 
   List<AppUser> postedUsers = [];
 
@@ -24,62 +27,98 @@ class BookmarkListModel extends ChangeNotifier {
     isLoading = false;
   }
 
-  /// ポストを10件取得(初回)
-  Future firstFetchPosts() async {
+  Future initProc() async {
     _reset();
+    await _fetchBookmarks();
+    bookmarksDocIdList = [...bookmarks!.bookmarksDocIdList.reversed];
+    await _firstFetchBookmarkList();
+  }
 
-    if (FirebaseAuth.instance.currentUser != null) {
-      await _checkLoginUserInfo(FirebaseAuth.instance.currentUser!.uid);
-    }
-
-    // ポストを10件取得
-    final QuerySnapshot snapshots = await FirebaseFirestore.instance
-        .collection('posts')
-        .orderBy('editedAt', descending: true)
-        .limit(10)
+  /// bookmarksコレクションからブックマーク情報を取得し、Bookmarksクラスを作成する
+  Future _fetchBookmarks() async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('bookmarks')
+        .doc(loginUser.id)
         .get();
-
-    // 次のページ読み込み時の開始地点を設定
-    if (snapshots.docs.isNotEmpty) {
-      _fetchedLastSnapshot = snapshots.docs.last;
+    if (!snapshot.exists) {
+      // bookmarksにドキュメントが無い場合は作成する
+      await FirebaseFirestore.instance
+          .collection('bookmarks')
+          .doc(loginUser.id)
+          .set({});
+      snapshot = await FirebaseFirestore.instance
+          .collection('bookmarks')
+          .doc(loginUser.id)
+          .get();
     }
+    bookmarks = Bookmarks(snapshot);
+  }
 
-    // 取得したポスト数が10件未満なら、postsコレクションのドキュメント
-    isFetchLastItem = snapshots.docs.length < 10;
-
-    await Future.wait(snapshots.docs.map((document) async {
-      final post = Post(document);
+  /// uidを基にusersコレクションからブックマークを10件取得(初回)
+  Future _firstFetchBookmarkList() async {
+    // ブックマークを10件取得
+    for (int index = 0; index < 10; index++) {
+      if (index == bookmarksDocIdList.length) {
+        break;
+      }
+      final snapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(bookmarksDocIdList[index])
+          .get();
+      final post = Post(snapshot);
       posts.add(post);
       await _addUserInfo(post.uid);
-    }).toList());
+      retrievedBookmarksDocIdListIndex = index;
+    }
+
+    // 取得したブックマークが10件以下
+    isFetchLastItem = bookmarksDocIdList.length <= 10;
+
     notifyListeners();
   }
 
-  /// ポストを追加で10件取得
-  Future fetchPosts() async {
-    // 最後に取得したドキュメントを起点に、ポストを10件取得
-    final QuerySnapshot snapshots = await FirebaseFirestore.instance
-        .collection('posts')
-        .orderBy('editedAt', descending: true)
-        .startAfterDocument(_fetchedLastSnapshot!)
-        .limit(10)
-        .get();
-
-    // postsコレクションのドキュメントを全て取得したかチェック
-    isFetchLastItem = snapshots.docs.isEmpty;
-    if (isFetchLastItem) {
-      notifyListeners();
-      return;
+  /// ブックマークを追加で10件取得
+  Future fetchBookmarkList() async {
+    // ループで前回の最後のIndexを起点に10件取得する(上限に達したらループ中断)
+    for (int index = retrievedBookmarksDocIdListIndex + 1;
+        index < index + 10;
+        index++) {
+      if (index == bookmarksDocIdList.length) {
+        break;
+      }
+      final snapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(bookmarksDocIdList[index])
+          .get();
+      posts.add(Post(snapshot));
+      retrievedBookmarksDocIdListIndex = index;
     }
 
-    // 次のページ読み込み時の開始地点を設定
-    _fetchedLastSnapshot = snapshots.docs.last;
+    // 残り件数がまだあるかチェック
+    final lastIndex = bookmarksDocIdList.length - 1;
+    final remainingItems = lastIndex - retrievedBookmarksDocIdListIndex;
+    isFetchLastItem = remainingItems <= 0;
 
-    snapshots.docs.map((document) {
-      final post = Post(document);
-      posts.add(post);
-      return post;
-    }).toList();
+    notifyListeners();
+  }
+
+  /// ポストをブックマークしているかチェック
+  bool isBookmark(String userId) {
+    if (bookmarks != null) {
+      return bookmarks!.bookmarksDocIdList.contains(userId);
+    }
+    return false;
+  }
+
+  /// 遷移先のユーザーページのブックマークの状態を反映する
+  void setBookmarkStatus(String userId, bool isBookmark) {
+    if (isBookmark) {
+      // ブックマーク登録
+      bookmarks!.bookmarksDocIdList.add(userId);
+    } else {
+      // ブックマーク解除
+      bookmarks!.bookmarksDocIdList.remove(userId);
+    }
     notifyListeners();
   }
 
@@ -102,30 +141,20 @@ class BookmarkListModel extends ChangeNotifier {
       }
     }
 
-    // postedUsersに無い場合はpostedUsersコレクションから取得する
+    // postedUsersに無い場合はusersコレクションから取得する
     final snapshot =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
     final user = AppUser(snapshot);
     postedUsers.add(user);
   }
 
-  /// ログインしているユーザー情報の確認
-  Future _checkLoginUserInfo(String uid) async {
-    if (loginUser != null) {
-      return;
-    }
-    final snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final user = AppUser(snapshot);
-    loginUser = user;
-  }
-
-  /// 取得したポストの情報とフラグをリセット
+  /// 取得したブックマークの情報とフラグをリセット
   void _reset() {
-    loginUser = null;
     posts = [];
-    _fetchedLastSnapshot = null;
+    retrievedBookmarksDocIdListIndex = 0;
     isFetchLastItem = false;
+    bookmarks = null;
+    posts = [];
     postedUsers = [];
   }
 }

@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/app_user.dart';
 import 'package:esu_n_esu/domain/follow_users.dart';
-import 'package:esu_n_esu/domain/post.dart';
 import 'package:flutter/material.dart';
 
 class FollowListModel extends ChangeNotifier {
@@ -9,7 +8,6 @@ class FollowListModel extends ChangeNotifier {
 
   FollowListModel(this.loginUser);
 
-  List<Post> posts = [];
   bool isLoading = false;
   int retrievedFollowUserListIndex = 0; // 現在取得している最後のユーザーのインデックスを保持
   bool isFetchLastItem = false;
@@ -125,7 +123,7 @@ class FollowListModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 遷移先のユーザーページのフォローステータスを反映する
+  /// 遷移先のユーザーページのフォローの状態を反映する
   void setFollowUserStatus(String userId, bool isFollow) {
     if (isFollow) {
       // フォロー登録
@@ -137,9 +135,8 @@ class FollowListModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 取得しフォローユーザーの情報とフラグをリセット
+  /// 取得したフォローユーザーの情報とフラグをリセット
   void _reset() {
-    posts = [];
     retrievedFollowUserListIndex = 0;
     isFetchLastItem = false;
     followUsers = null;

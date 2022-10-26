@@ -19,7 +19,7 @@ class FollowListPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Palette.mainColor,
-          title: Text('フォロー'),
+          title: Text('フォローリスト'),
         ),
         body: Center(
           child: Consumer<FollowListModel>(builder: (context, model, child) {
@@ -185,14 +185,5 @@ class FollowListPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  /// スナックバーを表示
-  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      backgroundColor: isSuccess ? Colors.green : Colors.red,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

@@ -1,71 +1,30 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors, use_build_context_synchronously, must_be_immutable
 
+import 'package:esu_n_esu/bookmark_list/bookmark_list_model.dart';
 import 'package:esu_n_esu/colors/Palette.dart';
 import 'package:esu_n_esu/content/content_page.dart';
 import 'package:esu_n_esu/domain/app_user.dart';
 import 'package:esu_n_esu/domain/post.dart';
-import 'package:esu_n_esu/edit_post/edit_post_page.dart';
-import 'package:esu_n_esu/home/home_model.dart';
-import 'package:esu_n_esu/login/login_page.dart';
-import 'package:esu_n_esu/my/user_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class BookmarkListPage extends StatelessWidget {
-  BookmarkListPage(this.user);
+  BookmarkListPage(this.loginUser);
 
-  AppUser user;
+  AppUser loginUser;
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<HomeModel>(
-      create: (_) => HomeModel()..firstFetchPosts(),
+    return ChangeNotifierProvider<BookmarkListModel>(
+      create: (_) => BookmarkListModel(loginUser)..initProc(),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Palette.mainColor,
-          title: Text('ブックマーク'),
-          actions: [
-            Consumer<HomeModel>(builder: (context, model, child) {
-              // ログインしているユーザー情報が取得できるまで、ログインボタンを表示しない
-              if (model.loginUser != null) {
-                if (model.loginUser == null) {
-                  return SizedBox();
-                }
-              }
-              return IconButton(
-                onPressed: () async {
-                  if (model.loginUser != null) {
-                    // マイページに遷移
-                    await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UserPage(model.loginUser!),
-                        ));
-                    await model.firstFetchPosts();
-                  } else {
-                    // ログイン画面に遷移
-                    String? loginOrRegisterMessage = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LoginPage(),
-                        ));
-                    if (loginOrRegisterMessage != null) {
-                      _showSnackBar(context, loginOrRegisterMessage, true);
-                      await model.firstFetchPosts();
-                    }
-                  }
-                },
-                icon: model.loginUser != null
-                    ? _showUserImage(model.loginUser!.userImageUrl, 36)
-                    : Icon(Icons.account_circle_outlined),
-                iconSize: 36,
-              );
-            }),
-          ],
+          title: Text('ブックマークリスト'),
         ),
         body: Center(
-          child: Consumer<HomeModel>(builder: (context, model, child) {
+          child: Consumer<BookmarkListModel>(builder: (context, model, child) {
             final posts = model.posts;
             if (posts.isEmpty) {
               if (!model.isFetchLastItem) {
@@ -85,7 +44,7 @@ class BookmarkListPage extends StatelessWidget {
               if (controller.position.maxScrollExtent == controller.offset &&
                   !model.isLoading) {
                 model.startLoading();
-                model.fetchPosts();
+                model.fetchBookmarkList();
                 model.endLoading();
               }
             });
@@ -93,39 +52,17 @@ class BookmarkListPage extends StatelessWidget {
             return _buildListView(controller, model, posts);
           }),
         ),
-        floatingActionButton:
-            Consumer<HomeModel>(builder: (context, model, child) {
-          if (model.loginUser == null) {
-            return Container();
-          }
-          return FloatingActionButton(
-            backgroundColor: Palette.mainColor,
-            onPressed: () async {
-              String? status = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditPostPage(null),
-                    fullscreenDialog: true,
-                  ));
-              if (status == '新規投稿') {
-                await model.firstFetchPosts();
-              }
-            },
-            tooltip: '新規記事投稿',
-            child: Icon(Icons.add),
-          );
-        }),
       ),
     );
   }
 
-  /// タイムラインのListViewを作成
+  /// ブックマーク一覧のListViewを作成
   Widget _buildListView(
-      ScrollController controller, HomeModel model, List<Post> posts) {
+      ScrollController controller, BookmarkListModel model, List<Post> posts) {
     return RefreshIndicator(
       // ポストの情報を初期化 & 最初の10件を取得
       onRefresh: () async {
-        await model.firstFetchPosts();
+        await model.initProc();
       },
       child: ListView.separated(
         controller: controller,
@@ -136,14 +73,14 @@ class BookmarkListPage extends StatelessWidget {
             return GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () async {
-                bool isUpdatedOrDeletedPost = await Navigator.push(
+                bool? isUpdatedOrDeletedPost = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ContentPage(posts[index],
                           model.getPostedUserInfo(posts[index].uid)!),
                     ));
-                if (isUpdatedOrDeletedPost) {
-                  await model.firstFetchPosts();
+                if (isUpdatedOrDeletedPost != null && isUpdatedOrDeletedPost) {
+                  await model.initProc();
                 }
               },
               child: Container(
@@ -298,14 +235,5 @@ class BookmarkListPage extends StatelessWidget {
             fit: BoxFit.cover),
       ),
     );
-  }
-
-  /// スナックバーを表示
-  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      backgroundColor: isSuccess ? Colors.green : Colors.red,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

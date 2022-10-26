@@ -32,10 +32,12 @@ class ContentPage extends StatelessWidget {
             child: Scaffold(
               appBar: AppBar(
                 backgroundColor: Palette.mainColor,
-                title: Text(model.post.title),
+                title:
+                    Text(model.isDeletedPost ? '削除済みのポスト' : model.post.title),
                 actions: [
                   if (model.loginUser != null &&
-                      model.post.uid == model.loginUser!.id)
+                      model.post.uid == model.loginUser!.id &&
+                      !model.isDeletedPost)
                     Consumer<ContentModel>(builder: (context, model, child) {
                       return PopupMenuButton(
                         onSelected: (Menu selectedItem) async {
@@ -64,126 +66,140 @@ class ContentPage extends StatelessWidget {
                     }),
                 ],
               ),
-              body: Container(
-                padding: EdgeInsets.fromLTRB(15, 10, 15, 0),
-                alignment: Alignment.topCenter,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        model.post.title,
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Text(
-                        '投稿日 [${DateFormat('yyyy/MM/dd').format(model.post.createdAt!)}]',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      if (model.post.isEdited)
-                        Text(
-                          '編集日 [${DateFormat('yyyy/MM/dd').format(model.post.editedAt!)}]',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      SizedBox(
-                        height: 4,
-                      ),
-                      InkWell(
-                        onTap: () async {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => UserPage(user),
-                              ));
-                        },
-                        child: Container(
-                          padding: EdgeInsets.fromLTRB(0, 5, 20, 5),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                width: 36,
-                                height: 36,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Image.network(
-                                    user.userImageUrl,
-                                    errorBuilder: (BuildContext context,
-                                        Object exception,
-                                        StackTrace? stackTrace) {
-                                      return Icon(
-                                        Icons.account_circle,
-                                        size: 36,
-                                      );
-                                    },
-                                  ),
+              body: Stack(
+                children: [
+                  if (!model.isDeletedPost)
+                    Container(
+                      padding: EdgeInsets.fromLTRB(15, 10, 15, 0),
+                      alignment: Alignment.topCenter,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              model.post.title,
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 8,
+                            ),
+                            Text(
+                              '投稿日 [${DateFormat('yyyy/MM/dd').format(model.post.createdAt!)}]',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            if (model.post.isEdited)
+                              Text(
+                                '編集日 [${DateFormat('yyyy/MM/dd').format(model.post.editedAt!)}]',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
                                 ),
                               ),
-                              SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  user.username,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                  ),
+                            SizedBox(
+                              height: 4,
+                            ),
+                            InkWell(
+                              onTap: () async {
+                                // TODO: 記事を更新する
+                                // TODO: 無い場合は「削除されました」と表示する
+                                await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => UserPage(user),
+                                    ));
+                                model.reloadPost();
+                              },
+                              child: Container(
+                                padding: EdgeInsets.fromLTRB(0, 5, 20, 5),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: 36,
+                                      height: 36,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        child: Image.network(
+                                          user.userImageUrl,
+                                          errorBuilder: (BuildContext context,
+                                              Object exception,
+                                              StackTrace? stackTrace) {
+                                            return Icon(
+                                              Icons.account_circle,
+                                              size: 36,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        user.username,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 12,
-                      ),
-                      Row(
-                        children: [
-                          for (String imageUrl in model.post.imageUrls) ...{
-                            _uploadedImageBox(context, imageUrl),
-                            if (model.post.imageUrls.length == 1 ||
-                                imageUrl != model.post.imageUrls.last)
-                              SizedBox(
-                                width: 8,
+                            ),
+                            SizedBox(
+                              height: 12,
+                            ),
+                            Row(
+                              children: [
+                                for (String imageUrl
+                                    in model.post.imageUrls) ...{
+                                  _uploadedImageBox(context, imageUrl),
+                                  if (model.post.imageUrls.length == 1 ||
+                                      imageUrl != model.post.imageUrls.last)
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                },
+                              ],
+                            ),
+                            SizedBox(
+                              height: 32,
+                            ),
+                            Text(
+                              model.post.content,
+                              style: TextStyle(
+                                fontSize: 16,
                               ),
-                          },
-                        ],
-                      ),
-                      SizedBox(
-                        height: 32,
-                      ),
-                      Text(
-                        model.post.content,
-                        style: TextStyle(
-                          fontSize: 16,
+                            ),
+                            SizedBox(
+                              height: 32,
+                            ),
+                            if (model.loginUser != null) ...{
+                              // ログイン中 & 他ユーザーのアカウントの場合
+                              _showBookmarkButton(context, model),
+                            },
+                            SizedBox(
+                              height: 32,
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                        height: 32,
-                      ),
-                      if (model.loginUser != null) ...{
-                        // ログイン中 & 他ユーザーのアカウントの場合
-                        _showBookmarkButton(context, model),
-                      },
-                      SizedBox(
-                        height: 32,
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                  if (model.isDeletedPost)
+                    Center(
+                      child: Text('このポストは削除されました'),
+                    ),
+                ],
               ),
             ),
           );

@@ -40,6 +40,16 @@ class ContentModel extends ChangeNotifier {
   Future initProc() async {
     // ログイン中のユーザーアカウント情報を取得
     await _getLoginUserAccount();
+
+    // 記事が削除されていないかチェック
+    final snapshot =
+        await FirebaseFirestore.instance.collection('posts').doc(post.id).get();
+    if (!snapshot.exists) {
+      flagDeletedPost();
+      notifyListeners();
+      return;
+    }
+
     // ブックマークの状態を取得
     if (loginUser != null) {
       await _getBookmarkInfo();
@@ -121,6 +131,12 @@ class ContentModel extends ChangeNotifier {
   Future reloadPost() async {
     final snapshot =
         await FirebaseFirestore.instance.collection('posts').doc(post.id).get();
+    if (!snapshot.exists) {
+      // ポストが削除された場合
+      flagDeletedPost();
+      notifyListeners();
+      return;
+    }
     post = Post(snapshot);
     isUpdatedPost = true;
     notifyListeners();

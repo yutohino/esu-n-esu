@@ -53,9 +53,9 @@ class UserPage extends StatelessWidget {
                                   BookmarkListPage(model.loginUser!),
                             ));
                       } else if (selectedItem == Menu.logout) {
-                        model.startLoading();
+                        model.startLogOuting();
                         await model.logout();
-                        model.endLoading();
+                        model.endLogOuting();
                         Navigator.pop(context, 'ログアウトしました');
                       }
                     },
@@ -184,7 +184,7 @@ class UserPage extends StatelessWidget {
                   }),
                 ),
                 Consumer<UserModel>(builder: (context, model, child) {
-                  if (model.isLoading) {
+                  if (model.isLogOuting) {
                     return Container(
                       color: Colors.black54,
                       child: Center(

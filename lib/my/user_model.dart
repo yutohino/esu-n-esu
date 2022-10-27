@@ -21,6 +21,8 @@ class UserModel extends ChangeNotifier {
 
   bool isFollowUser = false;
 
+  bool isLogOuting = false;
+
   void startLoading() {
     isLoading = true;
     notifyListeners();
@@ -89,7 +91,6 @@ class UserModel extends ChangeNotifier {
     // postsコレクションのドキュメントを全て取得したかチェック
     isFetchLastItem = snapshots.docs.isEmpty;
     if (isFetchLastItem) {
-      notifyListeners();
       return;
     }
 
@@ -101,7 +102,6 @@ class UserModel extends ChangeNotifier {
       posts.add(post);
       return post;
     }).toList();
-    notifyListeners();
   }
 
   Future reload() async {
@@ -206,6 +206,16 @@ class UserModel extends ChangeNotifier {
     posts = [];
     _fetchedLastSnapshot = null;
     isFetchLastItem = false;
+  }
+
+  void startLogOuting() {
+    isLogOuting = true;
+    notifyListeners();
+  }
+
+  void endLogOuting() {
+    isLogOuting = false;
+    notifyListeners();
   }
 
   Future logout() async {

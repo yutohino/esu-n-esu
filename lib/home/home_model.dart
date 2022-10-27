@@ -67,7 +67,6 @@ class HomeModel extends ChangeNotifier {
     // postsコレクションのドキュメントを全て取得したかチェック
     isFetchLastItem = snapshots.docs.isEmpty;
     if (isFetchLastItem) {
-      notifyListeners();
       return;
     }
 

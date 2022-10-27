@@ -21,10 +21,12 @@ class BookmarkListModel extends ChangeNotifier {
 
   void startLoading() {
     isLoading = true;
+    notifyListeners();
   }
 
   void endLoading() {
     isLoading = false;
+    notifyListeners();
   }
 
   Future initProc() async {
@@ -114,8 +116,6 @@ class BookmarkListModel extends ChangeNotifier {
     final lastIndex = bookmarksDocIdList.length - 1;
     final remainingItems = lastIndex - retrievedBookmarksDocIdListIndex;
     isFetchLastItem = remainingItems <= 0;
-
-    notifyListeners();
   }
 
   /// ブックマークを解除する

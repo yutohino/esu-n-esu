@@ -77,10 +77,11 @@ class HomePage extends StatelessWidget {
               if (model.isFetchLastItem) {
                 return;
               }
-              if (controller.position.maxScrollExtent == controller.offset &&
+              if (controller.position.pixels >=
+                      controller.position.maxScrollExtent * 0.9 &&
                   !model.isLoading) {
                 model.startLoading();
-                model.fetchPosts();
+                await model.fetchPosts();
                 model.endLoading();
               }
             });

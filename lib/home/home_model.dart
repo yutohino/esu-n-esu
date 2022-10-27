@@ -15,10 +15,12 @@ class HomeModel extends ChangeNotifier {
 
   void startLoading() {
     isLoading = true;
+    notifyListeners();
   }
 
   void endLoading() {
     isLoading = false;
+    notifyListeners();
   }
 
   /// ポストを10件取得(初回)
@@ -77,7 +79,6 @@ class HomeModel extends ChangeNotifier {
       posts.add(post);
       await _addUserInfo(post.uid);
     }).toList());
-    notifyListeners();
   }
 
   /// 記事のユーザー情報を取得

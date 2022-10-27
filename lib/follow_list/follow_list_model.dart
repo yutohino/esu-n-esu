@@ -18,10 +18,12 @@ class FollowListModel extends ChangeNotifier {
 
   void startLoading() {
     isLoading = true;
+    notifyListeners();
   }
 
   void endLoading() {
     isLoading = false;
+    notifyListeners();
   }
 
   Future initProc() async {
@@ -108,8 +110,6 @@ class FollowListModel extends ChangeNotifier {
     final lastIndex = followUsersIdList.length - 1;
     final remainingItems = lastIndex - retrievedFollowUserListIndex;
     isFetchLastItem = remainingItems <= 0;
-
-    notifyListeners();
   }
 
   /// ユーザーページのユーザーをフォローしているかチェック

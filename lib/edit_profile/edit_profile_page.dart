@@ -185,6 +185,7 @@ class EditProfilePage extends StatelessWidget {
   /// ユーザー画像を表示
   Widget _showUserImage(EditProfileModel model, double size) {
     if (model.editedImageFile != null) {
+      // 画像を挿入した
       return Container(
         width: size,
         height: size,
@@ -200,11 +201,13 @@ class EditProfilePage extends StatelessWidget {
       );
     }
     if (model.user.userImageUrl.isEmpty) {
+      // 設定画像なし & 画像の挿入なし
       return Icon(
         Icons.account_circle,
         size: size,
       );
     }
+    // 画像設定あり & 画像の挿入なし
     return Container(
       width: size,
       height: size,

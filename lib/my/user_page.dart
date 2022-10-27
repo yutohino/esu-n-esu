@@ -402,6 +402,9 @@ class UserPage extends StatelessWidget {
         shape: BoxShape.circle,
         image: DecorationImage(
           image: NetworkImage(userImageUrl),
+          onError: (error, stackTrace) {
+            print(stackTrace);
+          },
           fit: BoxFit.cover,
         ),
       ),

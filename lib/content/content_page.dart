@@ -107,8 +107,6 @@ class ContentPage extends StatelessWidget {
                             ),
                             InkWell(
                               onTap: () async {
-                                // TODO: 記事を更新する
-                                // TODO: 無い場合は「削除されました」と表示する
                                 await Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -121,25 +119,7 @@ class ContentPage extends StatelessWidget {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    SizedBox(
-                                      width: 36,
-                                      height: 36,
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        child: Image.network(
-                                          user.userImageUrl,
-                                          errorBuilder: (BuildContext context,
-                                              Object exception,
-                                              StackTrace? stackTrace) {
-                                            return Icon(
-                                              Icons.account_circle,
-                                              size: 36,
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
+                                    _showUserImage(model.user.userImageUrl, 28),
                                     SizedBox(width: 4),
                                     Flexible(
                                       child: Text(
@@ -204,6 +184,30 @@ class ContentPage extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// ユーザー画像を表示
+  Widget _showUserImage(String userImageUrl, double size) {
+    if (userImageUrl.isEmpty) {
+      return Icon(
+        Icons.account_circle,
+        size: size,
+      );
+    }
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(
+          image: NetworkImage(userImageUrl),
+          onError: (error, stackTrace) {
+            print(stackTrace);
+          },
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

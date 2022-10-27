@@ -202,17 +202,19 @@ class HomePage extends StatelessWidget {
                                 : '',
                             28),
                         SizedBox(width: 4),
-                        Text(
-                          model.getPostedUserInfo(posts[index].uid) != null
-                              ? model
-                                  .getPostedUserInfo(posts[index].uid)!
-                                  .username
-                              : '',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black54,
+                        Expanded(
+                          child: Text(
+                            model.getPostedUserInfo(posts[index].uid) != null
+                                ? model
+                                    .getPostedUserInfo(posts[index].uid)!
+                                    .username
+                                : '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
                           ),
                         ),
                       ],
@@ -220,22 +222,30 @@ class HomePage extends StatelessWidget {
                     SizedBox(height: 8),
                     Row(
                       children: [
-                        Text(
-                          '投稿日 [${DateFormat('yyyy/MM/dd').format(posts[index].createdAt!)}]',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black54,
+                        Flexible(
+                          child: Text(
+                            '投稿日 [${DateFormat('yyyy/MM/dd').format(posts[index].createdAt!)}]',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
                           ),
                         ),
                         SizedBox(
                           width: 8,
                         ),
                         if (posts[index].isEdited)
-                          Text(
-                            '編集日 [${DateFormat('yyyy/MM/dd').format(posts[index].editedAt!)}]',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.black54,
+                          Flexible(
+                            child: Text(
+                              '編集日 [${DateFormat('yyyy/MM/dd').format(posts[index].editedAt!)}]',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black54,
+                              ),
                             ),
                           ),
                       ],

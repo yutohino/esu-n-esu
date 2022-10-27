@@ -88,17 +88,16 @@ class FollowListPage extends StatelessWidget {
                     SizedBox(
                       width: 4,
                     ),
-                    Text(
-                      followUser.username,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black54,
-                      ),
-                    ),
                     Expanded(
-                      child: SizedBox(),
+                      child: Text(
+                        followUser.username,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                      ),
                     ),
                     _showFollowButton(context, model, index),
                     SizedBox(

@@ -69,7 +69,7 @@ class FollowListPage extends StatelessWidget {
         itemCount: followUserList.length + 1,
         itemBuilder: (BuildContext context, int index) {
           if (index < followUserList.length) {
-            final followUser = model.followUserList[index];
+            final followUser = followUserList[index];
             return InkWell(
               onTap: () async {
                 bool isFollow = await Navigator.push(
@@ -99,7 +99,7 @@ class FollowListPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    _showFollowButton(context, model, index),
+                    _showFollowButton(context, model, followUserList, index),
                     SizedBox(
                       width: 8,
                     )
@@ -157,9 +157,9 @@ class FollowListPage extends StatelessWidget {
   }
 
   /// フォローボタンの表示
-  Widget _showFollowButton(
-      BuildContext context, FollowListModel model, int index) {
-    final userId = model.followUserList[index].id;
+  Widget _showFollowButton(BuildContext context, FollowListModel model,
+      List<AppUser> followUserList, int index) {
+    final userId = followUserList[index].id;
     return TextButton(
       onPressed: () async {
         model.isFollowUser(userId)

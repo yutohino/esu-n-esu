@@ -56,7 +56,7 @@ class BookmarkListModel extends ChangeNotifier {
     bookmarks = Bookmarks(snapshot);
   }
 
-  /// uidを基にusersコレクションからブックマークを10件取得(初回)
+  /// postのidを基にpostsコレクションからブックマークを10件取得(初回)
   Future _firstFetchBookmarkList() async {
     // ブックマークを10件取得
     for (int index = 0; index < 10; index++) {
@@ -89,9 +89,9 @@ class BookmarkListModel extends ChangeNotifier {
   /// ブックマークを追加で10件取得
   Future fetchBookmarkList() async {
     // ループで前回の最後のIndexを起点に10件取得する(上限に達したらループ中断)
-    for (int index = retrievedBookmarksDocIdListIndex + 1;
-        index < index + 10;
-        index++) {
+    int index = retrievedBookmarksDocIdListIndex + 1;
+    int countAdditionalItems = index + 10;
+    for (index; index < countAdditionalItems; index++) {
       if (index == bookmarksDocIdList.length) {
         break;
       }

@@ -56,8 +56,7 @@ class FollowListModel extends ChangeNotifier {
   /// uidを基にusersコレクションからフォローユーザーを15件取得(初回)
   Future _firstFetchFollowUserList() async {
     // フォローユーザーを15件取得
-    int quantityRetrieve = 15;
-    for (int index = 0; index < quantityRetrieve; index++) {
+    for (int index = 0; index < 15; index++) {
       if (index == followUsersIdList.length) {
         break;
       }
@@ -85,9 +84,9 @@ class FollowListModel extends ChangeNotifier {
   /// フォローユーザーを追加で15件取得
   Future fetchFollowUserList() async {
     // ループで前回の最後のIndexを起点に15件取得する(上限に達したらループ中断)
-    for (int index = retrievedFollowUserListIndex + 1;
-        index < index + 15;
-        index++) {
+    int index = retrievedFollowUserListIndex + 1;
+    int countAdditionalItems = index + 15;
+    for (index; index < countAdditionalItems; index++) {
       if (index == followUsersIdList.length) {
         break;
       }
@@ -161,6 +160,7 @@ class FollowListModel extends ChangeNotifier {
     retrievedFollowUserListIndex = 0;
     isFetchLastItem = false;
     followUsers = null;
+    followUsersIdList = [];
     followUserList = [];
   }
 }

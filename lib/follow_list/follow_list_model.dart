@@ -93,7 +93,7 @@ class FollowListModel extends ChangeNotifier {
           .collection('users')
           .doc(followUsersIdList[index])
           .get();
-      // ユーザーアカウントが存在しない場合はフォローリストから削除する
+      // ユーザーアカウントが存在しない場合はフォローリストから削除する & フォロー解除する
       if (!snapshot.exists) {
         await unfollowUser(followUsersIdList[index]);
         followUsersIdList.removeAt(index);

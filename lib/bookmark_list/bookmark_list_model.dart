@@ -65,6 +65,13 @@ class BookmarkListModel extends ChangeNotifier {
           .collection('posts')
           .doc(bookmarksDocIdList[index])
           .get();
+      // ポストが存在しない場合はブックマークリストから削除する & ブックマーク解除する
+      if (!snapshot.exists) {
+        await _removeBookmark(bookmarksDocIdList[index]);
+        bookmarksDocIdList.removeAt(index);
+        index--;
+        continue;
+      }
       final post = Post(snapshot);
       posts.add(post);
       await _addUserInfo(post.uid);
@@ -90,7 +97,16 @@ class BookmarkListModel extends ChangeNotifier {
           .collection('posts')
           .doc(bookmarksDocIdList[index])
           .get();
-      posts.add(Post(snapshot));
+      // ポストが存在しない場合はブックマークリストから削除する & ブックマーク解除する
+      if (!snapshot.exists) {
+        await _removeBookmark(bookmarksDocIdList[index]);
+        bookmarksDocIdList.removeAt(index);
+        index--;
+        continue;
+      }
+      final post = Post(snapshot);
+      posts.add(post);
+      await _addUserInfo(post.uid);
       retrievedBookmarksDocIdListIndex = index;
     }
 
@@ -102,24 +118,15 @@ class BookmarkListModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// ポストをブックマークしているかチェック
-  bool isBookmark(String userId) {
-    if (bookmarks != null) {
-      return bookmarks!.bookmarksDocIdList.contains(userId);
-    }
-    return false;
-  }
-
-  /// 遷移先のユーザーページのブックマークの状態を反映する
-  void setBookmarkStatus(String userId, bool isBookmark) {
-    if (isBookmark) {
-      // ブックマーク登録
-      bookmarks!.bookmarksDocIdList.add(userId);
-    } else {
-      // ブックマーク解除
-      bookmarks!.bookmarksDocIdList.remove(userId);
-    }
-    notifyListeners();
+  /// ブックマークを解除する
+  Future _removeBookmark(String postId) async {
+    bookmarks!.bookmarksDocIdList.remove(postId);
+    await FirebaseFirestore.instance
+        .collection('bookmarks')
+        .doc(loginUser.id)
+        .update({
+      'bookmarksDocIdList': bookmarks!.bookmarksDocIdList,
+    });
   }
 
   /// 記事のユーザー情報を取得

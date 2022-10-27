@@ -131,15 +131,12 @@ class HomePage extends StatelessWidget {
             return GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () async {
-                bool? isUpdatedOrDeletedPost = await Navigator.push(
+                Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ContentPage(posts[index],
                           model.getPostedUserInfo(posts[index].uid)!),
                     ));
-                if (isUpdatedOrDeletedPost != null && isUpdatedOrDeletedPost) {
-                  await model.firstFetchPosts();
-                }
               },
               child: Container(
                 padding: EdgeInsets.all(8),

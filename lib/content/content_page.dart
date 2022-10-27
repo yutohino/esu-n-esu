@@ -47,7 +47,7 @@ class ContentPage extends StatelessWidget {
                                 builder: (context) => EditPostPage(model.post),
                               ));
                           if (status == '更新') {
-                            await model.reloadPost();
+                            await model.updatedPost();
                           }
                           if (status == '削除') {
                             model.flagDeletedPost();
@@ -110,9 +110,10 @@ class ContentPage extends StatelessWidget {
                                 await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => UserPage(user),
+                                      builder: (context) =>
+                                          UserPage(model.user),
                                     ));
-                                model.reloadPost();
+                                await model.reload();
                               },
                               child: Container(
                                 padding: EdgeInsets.fromLTRB(0, 5, 20, 5),
@@ -123,7 +124,7 @@ class ContentPage extends StatelessWidget {
                                     SizedBox(width: 4),
                                     Flexible(
                                       child: Text(
-                                        user.username,
+                                        model.user.username,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(

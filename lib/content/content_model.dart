@@ -38,27 +38,10 @@ class ContentModel extends ChangeNotifier {
   bool isBookmark = false;
 
   Future initProc() async {
-    // ログイン中のユーザーアカウント情報を取得
-    await _getLoginUserAccount();
-
-    // 記事が削除されていないかチェック
-    final snapshot =
-        await FirebaseFirestore.instance.collection('posts').doc(post.id).get();
-    if (!snapshot.exists) {
-      flagDeletedPost();
-      notifyListeners();
-      return;
-    }
-
-    // ブックマークの状態を取得
-    if (loginUser != null) {
-      await _getBookmarkInfo();
-      _getBookmarkStatus();
-    }
-    notifyListeners();
+    await reload();
   }
 
-  /// ユーザーページの情報が自分のアカウントかどうかチェック
+  /// ログイン中のユーザー情報を取得
   Future _getLoginUserAccount() async {
     User? loginUser = FirebaseAuth.instance.currentUser;
     if (loginUser == null) {
@@ -69,6 +52,13 @@ class ContentModel extends ChangeNotifier {
         .doc(loginUser.uid)
         .get();
     this.loginUser = AppUser(snapshot);
+  }
+
+  /// ポストの投稿者のユーザー情報を取得
+  Future _getPostedUserAccount() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(user.id).get();
+    user = AppUser(snapshot);
   }
 
   /// ログインしているユーザーのブックマーク情報を取得する
@@ -93,13 +83,11 @@ class ContentModel extends ChangeNotifier {
 
   /// 表示しているポストをブックマークしているかチェック
   void _getBookmarkStatus() {
-    // ブックマークリストからidの一致するポストを取得
-    bookmarks!.bookmarksDocIdList.map((bookmarkDocId) {
-      if (bookmarkDocId == post.id) {
-        isBookmark = true;
-        return;
-      }
-    }).toList();
+    if (bookmarks!.bookmarksDocIdList.contains(post.id)) {
+      isBookmark = true;
+    } else {
+      isBookmark = false;
+    }
   }
 
   /// ブックマーク登録/解除する
@@ -128,18 +116,39 @@ class ContentModel extends ChangeNotifier {
     return resultMessage;
   }
 
-  Future reloadPost() async {
+  Future reload() async {
+    // ログイン中のユーザー情報を取得
+    await _getLoginUserAccount();
+
+    await _reloadPost();
+
+    // ポストの投稿者のユーザー情報を取得
+    await _getPostedUserAccount();
+
+    notifyListeners();
+  }
+
+  Future _reloadPost() async {
+    // 記事が削除されていないかチェック
     final snapshot =
         await FirebaseFirestore.instance.collection('posts').doc(post.id).get();
     if (!snapshot.exists) {
-      // ポストが削除された場合
       flagDeletedPost();
       notifyListeners();
       return;
     }
     post = Post(snapshot);
+
+    // ブックマークの状態を取得
+    if (loginUser != null) {
+      await _getBookmarkInfo();
+      _getBookmarkStatus();
+    }
+  }
+
+  Future updatedPost() async {
+    await reload();
     isUpdatedPost = true;
-    notifyListeners();
   }
 
   void flagDeletedPost() {

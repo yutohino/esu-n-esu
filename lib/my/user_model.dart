@@ -34,6 +34,10 @@ class UserModel extends ChangeNotifier {
   Future initProc() async {
     // ログイン中のユーザーアカウント情報を取得
     await _getLoginUserAccount();
+
+    // 表示中のユーザーの情報を取得
+    await _reloadUserProfile();
+
     // フォローの状態を取得
     if (loginUser != null && !isMyAccount()) {
       await _getFollowUsers();
@@ -100,21 +104,30 @@ class UserModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future reloadUserProfile() async {
-    final snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(user.id).get();
-    user = AppUser(snapshot);
+  Future reload() async {
+    // ログイン中のユーザーアカウント情報を取得
+    await _getLoginUserAccount();
+
+    // 表示中のユーザーの情報を取得
+    await _reloadUserProfile();
+
+    // フォローの状態を取得
+    if (loginUser != null && !isMyAccount()) {
+      await _getFollowUsers();
+      _getFollowStatus();
+    }
+
     notifyListeners();
   }
 
-  /// 取得したポストの情報とフラグをリセット
-  void _reset() {
-    posts = [];
-    _fetchedLastSnapshot = null;
-    isFetchLastItem = false;
+  /// 表示中のユーザーの情報を取得
+  Future _reloadUserProfile() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(user.id).get();
+    user = AppUser(snapshot);
   }
 
-  /// ユーザーページの情報が自分のアカウントかどうかチェック
+  /// ログイン中のユーザーアカウント情報を取得
   Future _getLoginUserAccount() async {
     User? loginUser = FirebaseAuth.instance.currentUser;
     if (loginUser == null) {
@@ -186,6 +199,13 @@ class UserModel extends ChangeNotifier {
     });
     notifyListeners();
     return resultMessage;
+  }
+
+  /// 取得したポストの情報とフラグをリセット
+  void _reset() {
+    posts = [];
+    _fetchedLastSnapshot = null;
+    isFetchLastItem = false;
   }
 
   Future logout() async {

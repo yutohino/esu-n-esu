@@ -246,15 +246,16 @@ class UserPage extends StatelessWidget {
             return GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () async {
-                bool isUpdatedOrDeletedPost = await Navigator.push(
+                bool? isUpdatedOrDeletedPost = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
                           ContentPage(posts[index], model.user),
                     ));
-                if (isUpdatedOrDeletedPost) {
+                if (isUpdatedOrDeletedPost != null && isUpdatedOrDeletedPost) {
                   await model.firstFetchPosts();
                 }
+                await model.reload();
               },
               child: Container(
                 padding: EdgeInsets.all(8),
@@ -425,7 +426,7 @@ class UserPage extends StatelessWidget {
         if (updatedMessage != null) {
           _showSnackBar(context, updatedMessage, true);
         }
-        await model.reloadUserProfile();
+        await model.reload();
         await model.firstFetchPosts();
       },
       style: TextButton.styleFrom(

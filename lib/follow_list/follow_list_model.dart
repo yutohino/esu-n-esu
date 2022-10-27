@@ -54,7 +54,8 @@ class FollowListModel extends ChangeNotifier {
   /// uidを基にusersコレクションからフォローユーザーを15件取得(初回)
   Future _firstFetchFollowUserList() async {
     // フォローユーザーを15件取得
-    for (int index = 0; index < 15; index++) {
+    int quantityRetrieve = 15;
+    for (int index = 0; index < quantityRetrieve; index++) {
       if (index == followUsersIdList.length) {
         break;
       }
@@ -62,6 +63,13 @@ class FollowListModel extends ChangeNotifier {
           .collection('users')
           .doc(followUsersIdList[index])
           .get();
+      // ユーザーアカウントが存在しない場合はフォローリストから削除 & フォロー解除する
+      if (!snapshot.exists) {
+        await unfollowUser(followUsersIdList[index]);
+        followUsersIdList.removeAt(index);
+        index--;
+        continue;
+      }
       followUserList.add(AppUser(snapshot));
       retrievedFollowUserListIndex = index;
     }
@@ -85,6 +93,13 @@ class FollowListModel extends ChangeNotifier {
           .collection('users')
           .doc(followUsersIdList[index])
           .get();
+      // ユーザーアカウントが存在しない場合はフォローリストから削除する
+      if (!snapshot.exists) {
+        await unfollowUser(followUsersIdList[index]);
+        followUsersIdList.removeAt(index);
+        index--;
+        continue;
+      }
       followUserList.add(AppUser(snapshot));
       retrievedFollowUserListIndex = index;
     }
@@ -105,15 +120,21 @@ class FollowListModel extends ChangeNotifier {
     return false;
   }
 
-  /// ユーザーをフォロー登録/解除する
+  /// ユーザーをフォローする
   Future followUser(String userId) async {
-    if (followUsers!.followUsersIdList.contains(userId)) {
-      // フォロー解除
-      followUsers!.followUsersIdList.remove(userId);
-    } else {
-      // フォロー登録
-      followUsers!.followUsersIdList.add(userId);
-    }
+    followUsers!.followUsersIdList.add(userId);
+    await FirebaseFirestore.instance
+        .collection('follow')
+        .doc(loginUser.id)
+        .update({
+      'followUsersIdList': followUsers!.followUsersIdList,
+    });
+    notifyListeners();
+  }
+
+  /// ユーザーをフォロー解除する
+  Future unfollowUser(String userId) async {
+    followUsers!.followUsersIdList.remove(userId);
     await FirebaseFirestore.instance
         .collection('follow')
         .doc(loginUser.id)

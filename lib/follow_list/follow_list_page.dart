@@ -162,7 +162,9 @@ class FollowListPage extends StatelessWidget {
     final userId = model.followUserList[index].id;
     return TextButton(
       onPressed: () async {
-        await model.followUser(userId);
+        model.isFollowUser(userId)
+            ? await model.unfollowUser(userId)
+            : await model.followUser(userId);
       },
       style: model.isFollowUser(userId)
           ? TextButton.styleFrom(

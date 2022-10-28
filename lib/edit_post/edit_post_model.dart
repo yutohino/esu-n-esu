@@ -2,12 +2,14 @@
 
 import 'dart:collection';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/post.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EditPostModel extends ChangeNotifier {
@@ -61,11 +63,27 @@ class EditPostModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 画像を端末から選択
   Future pickImage(int index) async {
     final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      imageFiles.addAll({index: File(pickedFile.path)});
+      final file = File(pickedFile.path);
+
+      // 圧縮処理
+      int dataSize = _getFileSize(file);
+      Uint8List? result;
+      if (dataSize > 1000) {
+        result = await compressImage(file.path, 70);
+      } else if (dataSize > 100) {
+        result = await compressImage(file.path, 90);
+      }
+      if (result != null) {
+        file.writeAsBytesSync(result);
+      }
+
+      imageFiles.addAll({index: file});
       notifyListeners();
+
       if (post != null) {
         String deleteImageUrl = uploadedImageUrls.remove(index) ?? '';
         if (deleteImageUrl.isNotEmpty) {
@@ -74,6 +92,20 @@ class EditPostModel extends ChangeNotifier {
         isChangeImage = true;
       }
     }
+  }
+
+  int _getFileSize(File file) {
+    int sizeInBytes = file.lengthSync();
+    int sizeInMb = (sizeInBytes / (1024)).floor();
+    return sizeInMb;
+  }
+
+  Future<Uint8List?> compressImage(String filePath, int qualityPercent) async {
+    return await FlutterImageCompress.compressWithFile(filePath,
+        minWidth: 480,
+        minHeight: 480,
+        quality: qualityPercent,
+        keepExif: false);
   }
 
   bool isUpdated() {

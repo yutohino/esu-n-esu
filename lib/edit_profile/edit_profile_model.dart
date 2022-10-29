@@ -1,4 +1,7 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esu_n_esu/domain/app_user.dart';
@@ -6,6 +9,8 @@ import 'package:esu_n_esu/domain/post.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EditProfileModel extends ChangeNotifier {
@@ -50,10 +55,61 @@ class EditProfileModel extends ChangeNotifier {
 
   Future pickImage() async {
     final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      editedImageFile = File(pickedFile.path);
-      notifyListeners();
+    if (pickedFile == null) {
+      return;
     }
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
+      sourcePath: pickedFile.path,
+      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      cropStyle: CropStyle.circle,
+      compressFormat: ImageCompressFormat.jpg,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'トリミング',
+          toolbarColor: Colors.orange,
+          toolbarWidgetColor: Colors.white,
+          hideBottomControls: true,
+        ),
+        IOSUiSettings(
+          title: 'トリミング',
+        ),
+      ],
+    );
+
+    if (croppedFile == null) {
+      return;
+    }
+    // 圧縮処理
+    final file = File(croppedFile.path);
+    int dataSize = _getFileSize(file);
+    Uint8List? result;
+    if (dataSize > 1000) {
+      result = await compressImage(file.path, 70);
+    } else if (dataSize > 500) {
+      result = await compressImage(file.path, 80);
+    } else if (dataSize > 100) {
+      result = await compressImage(file.path, 90);
+    }
+    if (result != null) {
+      file.writeAsBytesSync(result);
+    }
+
+    editedImageFile = file;
+    notifyListeners();
+  }
+
+  int _getFileSize(File file) {
+    int sizeInBytes = file.lengthSync();
+    int sizeInMb = (sizeInBytes / (1024)).floor();
+    return sizeInMb;
+  }
+
+  Future<Uint8List?> compressImage(String filePath, int qualityPercent) async {
+    return await FlutterImageCompress.compressWithFile(filePath,
+        minWidth: 480,
+        minHeight: 480,
+        quality: qualityPercent,
+        keepExif: false);
   }
 
   Future saveEditedProfile() async {

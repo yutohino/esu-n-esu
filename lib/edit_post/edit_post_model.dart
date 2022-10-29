@@ -74,6 +74,8 @@ class EditPostModel extends ChangeNotifier {
       Uint8List? result;
       if (dataSize > 1000) {
         result = await compressImage(file.path, 70);
+      } else if (dataSize > 500) {
+        result = await compressImage(file.path, 80);
       } else if (dataSize > 100) {
         result = await compressImage(file.path, 90);
       }

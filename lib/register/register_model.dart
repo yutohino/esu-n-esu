@@ -58,6 +58,8 @@ class RegisterModel extends ChangeNotifier {
         await docUsers.set({
           'username': username,
           'email': email,
+          'userImageUrl': '',
+          'userDetail': '',
         });
         final docFollows =
             FirebaseFirestore.instance.collection('follow').doc(uid);

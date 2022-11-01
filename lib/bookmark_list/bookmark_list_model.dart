@@ -42,17 +42,6 @@ class BookmarkListModel extends ChangeNotifier {
         .collection('bookmarks')
         .doc(loginUser.id)
         .get();
-    if (!snapshot.exists) {
-      // bookmarksにドキュメントが無い場合は作成する
-      await FirebaseFirestore.instance
-          .collection('bookmarks')
-          .doc(loginUser.id)
-          .set({});
-      snapshot = await FirebaseFirestore.instance
-          .collection('bookmarks')
-          .doc(loginUser.id)
-          .get();
-    }
     bookmarks = Bookmarks(snapshot);
   }
 

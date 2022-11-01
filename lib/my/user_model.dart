@@ -150,17 +150,6 @@ class UserModel extends ChangeNotifier {
         .collection('follow')
         .doc(loginUser!.id)
         .get();
-    if (!snapshot.exists) {
-      // followsにドキュメントが無い場合は作成する
-      await FirebaseFirestore.instance
-          .collection('follow')
-          .doc(loginUser!.id)
-          .set({});
-      snapshot = await FirebaseFirestore.instance
-          .collection('follow')
-          .doc(loginUser!.id)
-          .get();
-    }
     followUsers = FollowUsers(snapshot);
   }
 

@@ -39,17 +39,6 @@ class FollowListModel extends ChangeNotifier {
         .collection('follow')
         .doc(loginUser.id)
         .get();
-    if (!snapshot.exists) {
-      // followにドキュメントが無い場合は作成する
-      await FirebaseFirestore.instance
-          .collection('follow')
-          .doc(loginUser.id)
-          .set({});
-      snapshot = await FirebaseFirestore.instance
-          .collection('follow')
-          .doc(loginUser.id)
-          .get();
-    }
     followUsers = FollowUsers(snapshot);
   }
 

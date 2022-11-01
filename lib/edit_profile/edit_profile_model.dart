@@ -115,7 +115,7 @@ class EditProfileModel extends ChangeNotifier {
   Future saveEditedProfile() async {
     final doc = FirebaseFirestore.instance.collection('users').doc(user.id);
     // ユーザー画像に変更があればStorageから削除およびアップロードを行う
-    String? newUserImageUrl;
+    String newUserImageUrl = '';
     if (editedImageFile != null) {
       if (user.userImageUrl.isNotEmpty) {
         await FirebaseStorage.instance.refFromURL(user.userImageUrl).delete();

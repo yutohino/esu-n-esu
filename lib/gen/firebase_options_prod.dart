@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart'
 ///
 /// Example:
 /// ```dart
-/// import 'firebase_options.dart';
+/// import 'firebase_options_prod.dart';
 /// // ...
 /// await Firebase.initializeApp(
 ///   options: DefaultFirebaseOptions.currentPlatform,
@@ -50,20 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD900iuq-dn_Tzz-iVf2-5aPqz4h3cSjPA',
-    appId: '1:433325071392:android:fc73f677ed5613bfc87045',
-    messagingSenderId: '433325071392',
-    projectId: 'esu-n-716b1',
-    storageBucket: 'esu-n-716b1.appspot.com',
+    apiKey: 'AIzaSyAoM_KAbLcw0yrKSddJmlOUrUbtbf2mpLU',
+    appId: '1:511182936825:android:5ed8e718d3a76a36682028',
+    messagingSenderId: '511182936825',
+    projectId: 'esu-n-esu-prod',
+    storageBucket: 'esu-n-esu-prod.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA9wnDsSeABRGrmPk2Sak9X4Phff65fBU4',
-    appId: '1:433325071392:ios:f62dd85a2dfabb74c87045',
-    messagingSenderId: '433325071392',
-    projectId: 'esu-n-716b1',
-    storageBucket: 'esu-n-716b1.appspot.com',
-    iosClientId: '433325071392-hgc9600k1di9ajd598737fjv0ksmm8f6.apps.googleusercontent.com',
+    apiKey: 'AIzaSyAgoqXHrs6K74nF9ColiSZpxeAXOBfaA7k',
+    appId: '1:511182936825:ios:21ed655654409717682028',
+    messagingSenderId: '511182936825',
+    projectId: 'esu-n-esu-prod',
+    storageBucket: 'esu-n-esu-prod.appspot.com',
+    iosClientId: '511182936825-5rkje2ai3267jpcd6qkuokdebouecqap.apps.googleusercontent.com',
     iosBundleId: 'com.yutohino.esunesu.esuNEsu',
   );
 }

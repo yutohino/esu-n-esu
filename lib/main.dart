@@ -8,7 +8,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // NOTE: nameを指定しないとprodビルドする際に、デフォルトのFirebase Appを複数回作成してしまい、起動できなくなる
   await Firebase.initializeApp(name: 'name', options: DefaultFirebaseOptions.currentPlatform);
   runApp(MyApp());
 }

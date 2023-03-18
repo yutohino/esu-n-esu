@@ -6,11 +6,16 @@ import 'package:esu_n_esu/home/home_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // NOTE: nameを指定しないとprodビルドする際に、デフォルトのFirebase Appを複数回作成してしまい、起動できなくなる
   await Firebase.initializeApp(name: 'name', options: getFirebaseOptions());
+  PackageInfo.fromPlatform().then((value) {
+    print(value.appName);
+    print(value.packageName);
+  });
   runApp(MyApp());
 }
 

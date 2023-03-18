@@ -47,10 +47,10 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.yutohino.esu_n_esu.esu_n_esu"
-        // You can update the following values to match your application needs.
+//        applicationId "com.yutohino.esu_n_esu.esu_n_esu" //
+        // You can update the following values to match your application needs. // appIdSuffixを使うのでコメントアウト
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 19
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -80,7 +80,13 @@ task copySources(type: Copy) {
     into 'src/main/res'
 }
 
+task selectGoogleServicesJson(type: Copy) {
+    from "src/$flavor/google-services.json"
+    into './'
+}
+
 tasks.whenTaskAdded { task ->
+    task.dependsOn copySources
     if (task.name == 'processDebugGoogleServices' || task.name == 'processReleaseGoogleServices') {
         task.dependsOn selectGoogleServicesJson
     }

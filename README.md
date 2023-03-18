@@ -1,6 +1,7 @@
 # esu_n_esu
 画像付きポスト投稿SNSアプリ。  
 Flutter × Firebaseの勉強用に制作。  
+アプリ名は「PlainPost」。
 
 ## 使用技術
 - 言語

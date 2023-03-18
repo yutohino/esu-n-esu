@@ -15,7 +15,7 @@ Future main() async {
 }
 
 FirebaseOptions getFirebaseOptions() {
-  const flavor = String.fromEnvironment('FLAVOR');
+  const flavor = String.fromEnvironment('flavor');
   switch (flavor) {
     case 'dev':
       print('$flavorでビルド');

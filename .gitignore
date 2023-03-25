@@ -128,6 +128,7 @@ app.*.symbols
 
 # launcher icon
 **/android/app/src/main/res/mipmap*/
+**/android/app/src/main/res/drawable*/
 
 # Firebase
 **/android/app/google-services.json

@@ -25,6 +25,10 @@ build-devdoc:
 build-prod:
 	flutter build apk --dart-define-from-file=dart_defines/prod.json
 
+.PHONY: build-release
+build-release:
+	flutter build appbundle --release --dart-define-from-file=dart_defines/prod.json
+
 # アプリビルド(iOS)
 .PHONY: build-ios-dev
 build-ios-dev:

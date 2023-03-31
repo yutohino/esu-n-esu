@@ -3,6 +3,13 @@
 Flutter × Firebaseの勉強用に制作。  
 アプリ名は「PlainPost」。
 
+## インストール
+Android版のみリリース。
+<a href="https://play.google.com/store/apps/details?id=com.yutohino.esu_n_esu.esu_n_esu">
+  <img alt="Get it on Google Play"
+       src="https://developer.android.com/images/brand/en_generic_rgb_wo_60.png" />
+</a>
+
 ## 使用技術
 - 言語
   - Dart(Flutter)
